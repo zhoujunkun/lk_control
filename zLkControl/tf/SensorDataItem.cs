@@ -6,7 +6,7 @@ namespace zLkControl
     class SensorDataItem
     {
         public double dist { get; set; }  //接收到距离
-
+        public int speed { get; set; }    //速度值
         public byte type { get; set;  }
 
         public byte id { get; set; }

@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO.Ports;
 using System.Management;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
@@ -15,24 +16,26 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-
+[assembly: SuppressIldasm()]
 namespace zLkControl
 {
+
     using LiveCharts;
     using LiveCharts.Configurations;
-    using LiveCharts.Wpf;
     using System.Threading.Tasks;
 
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
     /// 
-    public partial class MainWindow : MetroWindow
+    public partial class MainWindow : MetroWindow, INotifyPropertyChanged
     {
 
         /*新画图测试*/
         private double _axisMax;
         private double _axisMin;
+        private double _aYisMax;
+        private double _aYisMin;
         private double _trend;
         public ChartValues<MeasureModel> ChartValues { get; set; }
         public Func<double, string> DateTimeFormatter { get; set; }
@@ -73,8 +76,6 @@ namespace zLkControl
         LineGraph zLine = new LineGraph();
         List<Double> b = new List<Double>();
         List<Double> c = new List<Double>();
-        Double i = 0, q = 0;
-
         //struct
         public param_ lk_parm = new param_();
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -91,39 +92,55 @@ namespace zLkControl
         public MainWindow()
         {
             InitializeComponent();
-            base.DataContext = this;
             base.Loaded += new RoutedEventHandler(this.Window_Loaded);
-            //画图测试
+            ////画图测试
             var mapper = Mappers.Xy<MeasureModel>()
-            .X(model => model.DateTime.Ticks)   //use DateTime.Ticks as X
-            .Y(model => model.Value);           //use the value property as Y
-                                                //lets save the mapper globally.
+            .X(model => model.DateTime)   //use DateTime.Ticks as X
+            .Y(model => model.Value);           //use the value property as Y                                 //lets save the mapper globally.
             Charting.For<MeasureModel>(mapper);
             //the values property will store our values array
             ChartValues = new ChartValues<MeasureModel>();
-            //lets set how to display the X Labels
-            DateTimeFormatter = value => new DateTime((long)value).ToString("mm:ss");
-            //AxisStep forces the distance between each separator in the X axis
-            AxisStep = TimeSpan.FromSeconds(10).Ticks;
-            //AxisUnit forces lets the axis know that we are plotting seconds
-            //this is not always necessary, but it can prevent wrong labeling
-            AxisUnit = TimeSpan.TicksPerSecond;
-            SetAxisLimits(DateTime.Now);
-            
-            //The next code simulates data changes every 300 ms
-
+            chartDisplay.AnimationsSpeed = TimeSpan.FromMilliseconds(5);
+            AxisMax = 20;
+            AxisMin = 1;
             IsReading = false;
 
+            YFormatter = val => val.ToString("N") + " 米";
             DataContext = this;
         }
         #region   新绘图测试
+        public Func<double, string> YFormatter { get; set; }
+        
+        public double YixMax
+        {
+            get { return _aYisMax; }
+            set
+            {
+                _aYisMax = value;
+                OnPropertyChange("YixMax");
+
+            }
+        }
+
+        public double YixMin
+        {
+            get { return _aYisMin; }
+            set
+            {
+                _aYisMin = value;
+                OnPropertyChange("YixMin");
+
+            }
+        }
+
         public double AxisMax
         {
             get { return _axisMax; }
             set
             {
                 _axisMax = value;
-                OnPropertyChanged("AxisMax");
+                OnPropertyChange("AxisMax");
+                
             }
         }
         public double AxisMin
@@ -132,75 +149,60 @@ namespace zLkControl
             set
             {
                 _axisMin = value;
-                OnPropertyChanged("AxisMin");
+               OnPropertyChange("AxisMin");
             }
         }
 
         public bool IsReading { get; set; }
-
+        public  int time_count;
         private void Read()
         {
             var r = new Random();
 
             while (IsReading)
             {
-                Thread.Sleep(150);
-                var now = DateTime.Now;
-
+                Thread.Sleep(10);
+                SetAxisLimits();
                 _trend += r.Next(-8, 10);
-
+                time_count++;
+               
                 ChartValues.Add(new MeasureModel
                 {
-                    DateTime = now,
+                    DateTime = time_count,
                     Value = _trend
                 });
 
-                SetAxisLimits(now);
+                
 
-                //lets only use the last 150 values
+               // lets only use the last 150 values
                 if (ChartValues.Count > 150) ChartValues.RemoveAt(0);
             }
         }
 
-        private void SetAxisLimits(DateTime now)
+        private void SetAxisLimits()
         {
-            AxisMax = now.Ticks + TimeSpan.FromSeconds(1).Ticks; // lets force the axis to be 1 second ahead
-            AxisMin = now.Ticks - TimeSpan.FromSeconds(8).Ticks; // and 8 seconds behind
+            //AxisMax = now.Ticks + TimeSpan.FromSeconds(1).Ticks; // lets force the axis to be 1 second ahead
+            //AxisMin = now.Ticks - TimeSpan.FromSeconds(8).Ticks; // and 8 seconds behind
+            if(time_count>20)
+            {
+                AxisMax = time_count + 1;
+                AxisMin = time_count - 20;
+            }
         }
 
         private void InjectStopOnClick(object sender, RoutedEventArgs e)
         {
             IsReading = !IsReading;
             if (IsReading) Task.Factory.StartNew(Read);
+
         }
 
-        #region INotifyPropertyChanged implementation
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName = null)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
 
         #endregion
-        #endregion
-
-        /*测试函数*/
-        private void anysFrame(byte[] buff)
-        {
-            byte value_m = buff[0];
-            byte value_cm = buff[1];
-            base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
-            {
-                text_display.Text = value_m.ToString() + "." +value_cm.ToString();
-            }), new object[0]);
-        }
 
 
 
-        //lk id listenr
+        // lk id listenr
         const int LK03_DISPLAY_ID = 0X80;
         void idfunc(byte[] buf, SensorDataItem sensor)
         {
@@ -213,6 +215,8 @@ namespace zLkControl
         //lk type listenr
         const int LK03_DISPLAY_TYPE = (int)(LKSensorCmd.FRAME_TYPE.DataGet);
         const int LK03_PARM_TYPE = (int) (LKSensorCmd.FRAME_TYPE.ParamGet);
+        const int LK_Speed_Type = (int)(LKSensorCmd.FRAME_TYPE.SPEED_CTL);
+        int data_counts;
         void typefunc(byte[] buf, SensorDataItem sensor)
         {
             byte[] lkData = buf;
@@ -220,9 +224,34 @@ namespace zLkControl
             {
                 ShowData(buf,sensor);
                 sensor.dist = buf[1] << 8 | buf[0];
+                data_counts++;
+                if (data_counts > 20)
+                {
+                    AxisMax = data_counts + 1;
+                    AxisMin = data_counts - 20;
+                }
+                // lets only use the last 150 values
+                if (ChartValues.Count > 150) ChartValues.RemoveAt(0);
+                ChartValues.Add(new MeasureModel
+                {
+                    DateTime = data_counts,
+                    Value = sensor.dist/100,
+                });
                 DistTextBlock.Text = sensor.dist.ToString();
             }), new object[0]);
         }
+        void typeSpeedfunc(byte[] buf, SensorDataItem sensor)
+        {
+            byte[] lkData = buf;
+            base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
+            {
+                ShowData(buf, sensor);
+                sensor.speed = buf[1] << 8 | buf[0];
+                speedAngular.Value = sensor.speed / 10;
+                speed_display.Text = speedAngular.Value.ToString();
+            }), new object[0]);
+        }
+
         void ParmaRevFunc(byte[] buf, SensorDataItem sensor)
         {
             byte[] lkData = buf;
@@ -230,7 +259,7 @@ namespace zLkControl
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
                 string baud= lk_parm.baud_rate.ToString();
-                ellipse_led.DataContext = models;
+               // ellipse_led.DataContext = models;
                 sliderDist.Value = lk_parm.limit_dist;
                 ledStatuShake();
                 //  lk_parm.baud_rate.ToString;
@@ -272,7 +301,7 @@ namespace zLkControl
             try
             {
                 //led 
-                Lk_Serial.addFrameAnys(anysFrame);
+                // Lk_Serial.addFrameAnys(anysFrame);
                 //
                 sendTextBox.KeyDown += send_TxBx_kendown;
                 initBaudRate(BarudRate);
@@ -280,19 +309,21 @@ namespace zLkControl
                 initBaudRate(BaudRateParm);
                 SensorDataAcquirer mainDataAcquirer = this.Lk_Serial;
                 //add id listen
-              //  mainDataAcquirer.lkFrame.addIDlistener(LK03_DISPLAY_ID, idfunc);
+                //  mainDataAcquirer.lkFrame.addIDlistener(LK03_DISPLAY_ID, idfunc);
                 mainDataAcquirer.lkFrame.addTYPElistener(LK03_DISPLAY_TYPE, typefunc);
                 mainDataAcquirer.lkFrame.addTYPElistener(LK03_PARM_TYPE, ParmaRevFunc);
+                mainDataAcquirer.lkFrame.addTYPElistener(LK_Speed_Type, typeSpeedfunc);
                 //plot
-
+                //Value = 160;
                 //
                 mainDataAcquirer.SensorDataChangedEvent = (SensorDataAcquirer.SensorDataChangedHandler)Delegate.Combine(mainDataAcquirer.SensorDataChangedEvent, new SensorDataAcquirer.SensorDataChangedHandler(this.MainDataAcquirer_SensorDataChangedEvent));
                 EnumerableDataSource<Points> ds = new EnumerableDataSource<Points>(this.dd);
                 ds.SetXMapping((Points x) => x.Counter);
                 ds.SetYMapping((Points y) => y.Value);
-               // this.chart = plotterTimeLine.AddLineGraph(ds, Colors.Blue, 2.0);
+                // this.chart = plotterTimeLine.AddLineGraph(ds, Colors.Blue, 2.0);
                 this.plotterTimeLine.LegendVisible = false;
                 plotterTimeLine.Viewport.FitToView();
+                
                 this.timerEftPtsCounter = new System.Timers.Timer();
                 this.timerEftPtsCounter.Interval = 1000;
                 this.timerEftPtsCounter.Elapsed += TimerEftPtsCounter_Elapsed1;
@@ -302,7 +333,7 @@ namespace zLkControl
             catch (Exception ex)
             {
                 ErrorLog.WriteLog(ex, "");
-                
+
                 MessageBox.Show("Unknow error, exit!", "Error", MessageBoxButton.OK, MessageBoxImage.Hand);
                 Application.Current.Shutdown(-1);
             }
@@ -617,15 +648,15 @@ namespace zLkControl
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
                 this.ddCounter++;
-                int xax = ddCounter - 100;
-                if (xax <= 0)
-                {
-                    xax = 0;
-                }
-               // plotterTimeLine.Viewport.Visible = new System.Windows.Rect(xax, 0, 50, data.dist+1000);
-              //  plotterTimeLine.Viewport.Width = (xax);
-               this.dd.Add(new Points((uint)this.ddCounter, data.dist));
-               
+                //int xax = ddCounter - 100;
+                //if (xax <= 0)
+                //{
+                //    xax = 0;
+                //}
+                //this.dd.Add(new Points((uint)this.ddCounter, data.dist));
+                SetAxisLimits();
+
+
             }), new object[0]);
 
         }
@@ -643,8 +674,33 @@ namespace zLkControl
                 ErrorLog.WriteLog(ex, "");
             }
         }
+        #region 测速
+        //开始测速
+        public void Btn_Clicked_SpeedStart(object sender, RoutedEventArgs e)
+        {
+            send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.SPEED_CTL);
+            send_msg.id = (byte)(LKSensorCmd.FRAME_SpeeCtlID.START);
+            send_msg.ifHeadOnly = true;
+            Lk_Serial.SendMsg(send_msg);
+            ShowData(send_msg.sendFrame, null);
+        }
+        //停止测速
+        public void Btn_Clicked_SpeedStop(object sender, RoutedEventArgs e)
+        {
+            send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.SPEED_CTL);
+            send_msg.id = (byte)(LKSensorCmd.FRAME_SpeeCtlID.STOP);
+            send_msg.ifHeadOnly = true;
+            Lk_Serial.SendMsg(send_msg);
+            ShowData(send_msg.sendFrame, null);
+        }
+
+
+        #endregion
+
+
+
         #region 命令按钮
-    
+
         //单次测量
         public void Btn_Once_Cmd(object sender, RoutedEventArgs e)
         {
@@ -1102,19 +1158,40 @@ namespace zLkControl
             infoWin.ShowDialog();
             
         }
+        private double _value;
+        #region 测速模块
+        //public double Value
+        //{
+        //    get { return _value; }
+        //    set
+        //    {
+        //        _value = value;
+        //        OnPropertyChanged("Value");
+        //    }
+        //}
+        //public event PropertyChangedEventHandler PropertyChanged;
 
-    }
-
-  class NotifyBase : INotifyPropertyChanged
-    {
+        //protected virtual void OnPropertyChanged(string propertyName = null)
+        //{
+        //    if (PropertyChanged != null)
+        //        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        //}
+        #endregion
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChange(string propertyName)
         {
-            if(PropertyChanged != null)
+           
+            if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+
+    }
+
+    class NotifyBase 
+    {
 
         private bool heartBeat;
 
@@ -1124,18 +1201,15 @@ namespace zLkControl
             set
             {
                 heartBeat = value;
-                OnPropertyChange("HeartBeat");
+             //   OnPropertyChange("HeartBeat");
             }
         }
     }
 
     public class MeasureModel
     {
-        public DateTime DateTime { get; set; }
+        public int DateTime { get; set; }
         public double Value { get; set; }
-
-
-       
     }
 
 }
