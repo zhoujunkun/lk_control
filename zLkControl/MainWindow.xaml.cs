@@ -1,6 +1,4 @@
 ﻿using MahApps.Metro.Controls;
-using Microsoft.Research.DynamicDataDisplay;
-using Microsoft.Research.DynamicDataDisplay.DataSources;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -44,11 +42,9 @@ namespace zLkControl
 
         //tf
         private info infoWin;
-        private DynamicDisplay dd = new DynamicDisplay();
         private SensorDataAcquirer Lk_Serial = new SensorDataAcquirer();
         LKSensorCmd LKSensorCmd = new LKSensorCmd();
         NotifyBase models = new NotifyBase();
-        private LineGraph chart;
         private System.Timers.Timer timerEftPtsCounter;
         private int eftPtsPerSec;
         private bool flagSP;
@@ -71,12 +67,8 @@ namespace zLkControl
         bool isCMDSent;
         private int offset;  //偏移量
         private Queue<double> DistHistory = new Queue<double>();  //距离历史数据
-        private double MeanRange = 5.0;
-        //display
-        LineGraph zLine = new LineGraph();
-        List<Double> b = new List<Double>();
-        List<Double> c = new List<Double>();
-        //struct
+
+  //struct
         public param_ lk_parm = new param_();
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
         public struct param_
@@ -152,7 +144,16 @@ namespace zLkControl
                OnPropertyChange("AxisMin");
             }
         }
-
+        private double chartLimitValue;
+        public double ChartLimitValue
+        {
+            get { return chartLimitValue; }
+            set
+            {
+                chartLimitValue = value;
+                OnPropertyChange("ChartLimitValue");
+            }
+        }
         public bool IsReading { get; set; }
         public  int time_count;
         private void Read()
@@ -163,7 +164,7 @@ namespace zLkControl
             {
                 Thread.Sleep(10);
                 SetAxisLimits();
-                _trend += r.Next(-8, 10);
+                _trend = r.Next(40, 50);
                 time_count++;
                
                 ChartValues.Add(new MeasureModel
@@ -261,6 +262,7 @@ namespace zLkControl
                 string baud= lk_parm.baud_rate.ToString();
                // ellipse_led.DataContext = models;
                 sliderDist.Value = lk_parm.limit_dist;
+
                 ledStatuShake();
                 //  lk_parm.baud_rate.ToString;
                 BaudRateParm.Text = lk_parm.baud_rate.ToString();  //这里改变了波特率
@@ -317,13 +319,7 @@ namespace zLkControl
                 //Value = 160;
                 //
                 mainDataAcquirer.SensorDataChangedEvent = (SensorDataAcquirer.SensorDataChangedHandler)Delegate.Combine(mainDataAcquirer.SensorDataChangedEvent, new SensorDataAcquirer.SensorDataChangedHandler(this.MainDataAcquirer_SensorDataChangedEvent));
-                EnumerableDataSource<Points> ds = new EnumerableDataSource<Points>(this.dd);
-                ds.SetXMapping((Points x) => x.Counter);
-                ds.SetYMapping((Points y) => y.Value);
-                // this.chart = plotterTimeLine.AddLineGraph(ds, Colors.Blue, 2.0);
-                this.plotterTimeLine.LegendVisible = false;
-                plotterTimeLine.Viewport.FitToView();
-                
+              
                 this.timerEftPtsCounter = new System.Timers.Timer();
                 this.timerEftPtsCounter.Interval = 1000;
                 this.timerEftPtsCounter.Elapsed += TimerEftPtsCounter_Elapsed1;
@@ -460,7 +456,7 @@ namespace zLkControl
         //清空接收数据
         private void ClearReceiveButton_Click(object sender, RoutedEventArgs e)
         {
-            dd.Clear();
+
             count_texbox = 0;
             recieveTextBox.Clear();
         }
@@ -639,23 +635,11 @@ namespace zLkControl
                 {
                     data.dist *= 100; //接收数据*100cm = 米
                 }
-                if(DistHistory.Count<MeanRange)
-                {
 
-                }
                 this.PointNum += 1L;
 
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
-                this.ddCounter++;
-                //int xax = ddCounter - 100;
-                //if (xax <= 0)
-                //{
-                //    xax = 0;
-                //}
-                //this.dd.Add(new Points((uint)this.ddCounter, data.dist));
-                SetAxisLimits();
-
 
             }), new object[0]);
 
@@ -762,6 +746,7 @@ namespace zLkControl
             if (e.Key == Key.Enter)
             {
                 sliderDist.Value = int.Parse(textBox_LimitTrig.Text);
+                
                 MessageBoxResult dr = MessageBox.Show("是否配置触发距离" + textBox_LimitTrig.Text + "m", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
                 if (dr == MessageBoxResult.OK)
                 {
@@ -1158,7 +1143,7 @@ namespace zLkControl
             infoWin.ShowDialog();
             
         }
-        private double _value;
+
         #region 测速模块
         //public double Value
         //{
@@ -1187,7 +1172,10 @@ namespace zLkControl
             }
         }
 
+        private void Btn_Clicked_Setting(object sender, RoutedEventArgs e)
+        {
 
+        }
     }
 
     class NotifyBase 

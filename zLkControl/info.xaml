@@ -30,7 +30,7 @@
 				FontFamily="Times New Roman"
 				Foreground="#FF3B3EEA" />
             <TextBlock
-				Text="wake robot up"
+				Text="zjk"
 				Margin="0,10,0,8"
 				TextWrapping="Wrap"
 				FontSize="12"

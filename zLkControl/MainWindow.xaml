@@ -16,9 +16,16 @@
         <Controls:WindowCommands>
             <Button Content="About" 
             Click="Btn_Clicked_About"   />
+          
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>
-    <Grid x:Name="grid">
+    <Controls:MetroWindow.LeftWindowCommands>
+        <Controls:WindowCommands>
+            <Button Content="Setting" 
+            Click="Btn_Clicked_Setting"   />
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.LeftWindowCommands>
+        <Grid x:Name="grid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
@@ -56,7 +63,7 @@
                                             <RowDefinition Height="332*"/>
                                             <RowDefinition Height="169*"/>
                                         </Grid.RowDefinitions>
-                                        <Button  Content="单次" x:Name="Btn_Once" IsEnabled="False" Click="Btn_Once_Cmd" HorizontalAlignment="Left" Margin="26,0,0,150" Width="210" BorderBrush="#FF647878" FontSize="20" Background="{x:Null}" Foreground="#FFA46161" Height="60" VerticalAlignment="Bottom"/>
+                                        <Button  Content="单次" x:Name="Btn_Once" IsEnabled="False" Click="Btn_Once_Cmd" HorizontalAlignment="Left" Margin="26,0,0,144" Width="210" BorderBrush="#FF647878" FontSize="20" Background="{x:Null}" Foreground="#FFA46161" Height="60" VerticalAlignment="Bottom"/>
                                         <Button Content="连续" x:Name="Btn_Continue" IsEnabled="False" Click="Btn_Contitue_Cmd" Margin="26,0,0,70.667" BorderBrush="#FF5F2828" Height="60" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="210" FontSize="20">
                                             <Button.BitmapEffect>
                                                 <BevelBitmapEffect x:Name="testBe"
@@ -67,25 +74,24 @@
                                                                    Smoothness="0.5"/>
                                             </Button.BitmapEffect>
                                         </Button>
-                                        <Button IsEnabled="False" Content="恢复出厂设置" Margin="164,0,0,25" BorderBrush="#FF975252" FontFamily="Microsoft YaHei UI" HorizontalAlignment="Left" Width="86" Click="reset_button_click" Height="27" RenderTransformOrigin="0.533,0.815" Grid.Row="1" VerticalAlignment="Bottom"/>
+                                        <Button IsEnabled="False" Content="恢复出厂设置" Margin="167,0,0,35" BorderBrush="#FF975252" FontFamily="Microsoft YaHei UI" HorizontalAlignment="Left" Width="86" Click="reset_button_click" Height="27" RenderTransformOrigin="0.533,0.815" Grid.Row="1" VerticalAlignment="Bottom"/>
                                         <Label Content="波特率配置" HorizontalAlignment="Left" Height="32" Margin="0,7,0,0" VerticalAlignment="Top" Width="112" FontSize="20"/>
-                                        <ComboBox x:Name="BaudRateParm" IsEnabled="False" HorizontalAlignment="Left" Height="17" Margin="121,11,0,0" VerticalAlignment="Top" Width="89"/>
-                                        <Button Content="获取传感器参数" IsEnabled="False" Click="Btn_Click_getParam" x:Name="Btn_Get_Parm" HorizontalAlignment="Left" Margin="164,0,0,64" Width="86" FontWeight="Normal" FontSize="10" Grid.Row="1" Height="27" VerticalAlignment="Bottom"/>
+                                        <ComboBox x:Name="BaudRateParm" IsEnabled="False" HorizontalAlignment="Left" Height="17" Margin="121,11,0,0" VerticalAlignment="Top" Width="114"/>
+                                        <Button Content="获取传感器参数" IsEnabled="False" Click="Btn_Click_getParam" x:Name="Btn_Get_Parm" HorizontalAlignment="Left" Margin="166,0,0,70" Width="86" FontWeight="Normal" FontSize="10" Grid.Row="1" Height="27" VerticalAlignment="Bottom"/>
                                         <Button Content="配置触发距离" IsEnabled="False" x:Name="Btn_LimitDist_Set"  Click="Limit_Dist_PamClick" HorizontalAlignment="Left" Height="32" Margin="121,81,0,0" VerticalAlignment="Top" Width="115" FontFamily="Segoe UI, Lucida Sans Unicode, Verdana" FontWeight="Normal" FontSize="16"/>
-                                        <ProgressBar x:Name="progressBarUpdata" HorizontalAlignment="Left" Margin="164,0,0,10" Width="100" Grid.Row="1" Height="10" VerticalAlignment="Bottom" />
-                                        <Button Content="升级" HorizontalAlignment="Left" Margin="10,0,0,10" Width="75" Click="Updata_Click" Grid.Row="1" Height="27" VerticalAlignment="Bottom"/>
+                                        <ProgressBar x:Name="progressBarUpdata" HorizontalAlignment="Left" Margin="148,0,0,10" Width="100" Grid.Row="1" Height="10" VerticalAlignment="Bottom" />
+                                        <Button Content="升级" HorizontalAlignment="Left" Margin="13,0,0,14" Width="41" Click="Updata_Click" Grid.Row="1" Height="31" VerticalAlignment="Bottom"/>
                                         <Label Content="m" HorizontalAlignment="Left" Margin="83,80,0,0" VerticalAlignment="Top" FontSize="18" Width="29"/>
-                                        <Slider x:Name="sliderDist" Maximum="500" IsSnapToTickEnabled="True" IsSelectionRangeEnabled="True"   HorizontalAlignment="Left" Margin="10,54,0,0" VerticalAlignment="Top" Width="204" Height="21"/>
+                                        <Slider x:Name="sliderDist" Maximum="500" IsSnapToTickEnabled="True" IsSelectionRangeEnabled="True"   HorizontalAlignment="Left" Margin="9,52,0,0" VerticalAlignment="Top" Width="204" Height="21"/>
                                         <TextBlock Text="{Binding Value, ElementName=sliderDist}" HorizontalAlignment="Left" Margin="221,53,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="51" FontSize="18" Foreground="#FFE83131"/>
 
-                                        <RadioButton IsEnabled="False" Click="radioBtn_front_click" x:Name="RadioBtn_Front" Content="前基准测量" HorizontalAlignment="Left" Margin="10,0,0,64" Width="90" RenderTransformOrigin="0.422,1.667" Foreground="#FFA46161" Grid.Row="1" Height="18" VerticalAlignment="Bottom"/>
-                                        <RadioButton IsEnabled="False" Click="radioBtn_base_click"  x:Name="RadioBtn_Base"  Content="后基准测量" HorizontalAlignment="Left" Margin="10,0,0,43" RenderTransformOrigin="0.393,1.111" Foreground="#FFA46161" Grid.Row="1" Height="18" VerticalAlignment="Bottom"/>
+                                        <RadioButton IsEnabled="False" Click="radioBtn_front_click" x:Name="RadioBtn_Front" Content="前基准测量" HorizontalAlignment="Left" Margin="11,0,0,84" Width="90" RenderTransformOrigin="0.422,1.667" Foreground="#FFA46161" Grid.Row="1" Height="18" VerticalAlignment="Bottom"/>
+                                        <RadioButton IsEnabled="False" Click="radioBtn_base_click"  x:Name="RadioBtn_Base"  Content="后基准测量" HorizontalAlignment="Left" Margin="11,0,0,61" RenderTransformOrigin="0.393,1.111" Foreground="#FFA46161" Grid.Row="1" Height="18" VerticalAlignment="Bottom"/>
                                         <TextBox HorizontalAlignment="Left" x:Name="textBox_LimitTrig" PreviewKeyDown ="textBox_Enter" Text="{Binding Value, ElementName=sliderDist, Mode=TwoWay}" Height="23" Margin="10,86,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="68"/>
                                         <Button Content="Stop" IsEnabled="False" x:Name="Btn_Stop" Click="Btn_Click_Stop" HorizontalAlignment="Left" Margin="83,0,0,16" Width="91" FontSize="20" BorderBrush="#FFCF0000" FontWeight="Bold" Height="41" VerticalAlignment="Bottom"/>
-                                        <Controls:ToggleSwitch Header="辅助红外激光" IsEnabled="False" x:Name="checkBox_red"  Click="checkBox_red_click"  RenderTransformOrigin="0.413,0.508" Margin="10,0,160,105" Foreground="#FFA46161" ThumbIndicatorBrush="#FF4F9B9B" Grid.Row="1" Height="64" VerticalAlignment="Bottom"/>
-                                        <Controls:ToggleSwitch Header="通电自动测量" IsEnabled="False" x:Name="checkBox_Atuo_Che"  Click="checkBox_Atuo_click"  RenderTransformOrigin="0.413,0.508" Margin="148,0,22,105" Foreground="#FFA46161" ThumbIndicatorBrush="#FF4F9B9B" Grid.Row="1" Height="64" VerticalAlignment="Bottom"/>
-                                        <Button Content="Button" Click="InjectStopOnClick" HorizontalAlignment="Left" Margin="171,289,0,0" VerticalAlignment="Top" Width="75"/>
-
+                                        <Controls:ToggleSwitch Header="辅助红外激光" IsEnabled="False" x:Name="checkBox_red"  Click="checkBox_red_click"  RenderTransformOrigin="0.413,0.508" Margin="10,0,167,108" Foreground="#FFA46161" ThumbIndicatorBrush="#FF4F9B9B" Grid.Row="1" Height="59" VerticalAlignment="Bottom"/>
+                                        <Controls:ToggleSwitch Header="通电自动测量" IsEnabled="False" x:Name="checkBox_Atuo_Che"  Click="checkBox_Atuo_click"  RenderTransformOrigin="0.413,0.508" Margin="151,0,23,107" Foreground="#FFA46161" ThumbIndicatorBrush="#FF4F9B9B" Grid.Row="1" Height="60" VerticalAlignment="Bottom"/>
+                                        <Button Content="Button" Click="InjectStopOnClick" HorizontalAlignment="Left" Margin="189,276,0,0" VerticalAlignment="Top" Width="75"/>
                                     </Grid>
                                 </TabItem>
                                 <TabItem Header="测速" FontSize="11">
@@ -95,8 +101,8 @@
                                         </Grid.RowDefinitions>
                                         <TextBlock x:Name="speed_display" HorizontalAlignment="Left" Margin="109,173,0,0" TextWrapping="Wrap" Text="000" VerticalAlignment="Top" Height="30" Width="48" FontSize="25" Foreground="#FFD47575" RenderTransformOrigin="0.152,0.2"/>
                                         <Label Content="km/h" HorizontalAlignment="Left" Margin="102,208,0,0" VerticalAlignment="Top" Width="55" FontSize="18" Height="33"/>
-                                        <Button Content="开始测速" Click="Btn_Clicked_SpeedStart" HorizontalAlignment="Left" Margin="143,339,0,0" VerticalAlignment="Top" Width="96" FontSize="20" Height="41"/>
-                                        <Button Content="停止测速" Click="Btn_Clicked_SpeedStop" HorizontalAlignment="Left" Margin="18,338,0,0" VerticalAlignment="Top" Width="96" FontSize="20" Height="41"/>
+                                        <Button Content="开始测速" Click="Btn_Clicked_SpeedStart" HorizontalAlignment="Left" Margin="149,309,0,0" VerticalAlignment="Top" Width="96" FontSize="20" Height="41"/>
+                                        <Button Content="停止测速" Click="Btn_Clicked_SpeedStop" HorizontalAlignment="Left" Margin="23,309,0,0" VerticalAlignment="Top" Width="96" FontSize="20" Height="41"/>
 
                                         <lvc:AngularGauge Name="speedAngular" Value="20" FromValue="20" ToValue="200" 
                                               LabelsStep="20" TicksStep="10" Wedge="297"
@@ -113,41 +119,42 @@
                             </TabControl>
                             <GroupBox Header="GroupBox" Margin="283,0,0,10" Background="#CC30BCE6">
                                 <Grid Margin="0">
+
                                     <lvc:CartesianChart x:Name="chartDisplay"
                                             AnimationsSpeed="0:0:0.5"  DisableAnimations="True"          
-                                           
                                             Margin="3,9,-6,0" 
                                             >
-
                                         <lvc:CartesianChart.Series>
                                             <lvc:LineSeries Values="{Binding ChartValues}" 
-                                Title="dist:"
-                                LineSmoothness="1"
-                                StrokeThickness="2" 
-                                DataLabels="False"            
-                                Stroke="#FF5E9BA8"
-                                Panel.ZIndex="3"
-                                PointGeometrySize="8"     
-                                 Fill="Transparent"
-
-                                    />
+                                            Title="dist:"
+                                            LineSmoothness="1"
+                                            StrokeThickness="2" 
+                                            DataLabels="False"            
+                                            Stroke="#FF5E9BA8"
+                                            Panel.ZIndex="3"
+                                            PointGeometrySize="8"     
+                                             Fill="Transparent"  />
                                         </lvc:CartesianChart.Series>
                                         <lvc:CartesianChart.AxisX >
                                             <lvc:Axis                                                                            
-                                MaxValue="{Binding AxisMax}"
-                                MinValue="{Binding AxisMin}"
-                                Unit="1">
+                                            MaxValue="{Binding AxisMax}"
+                                            MinValue="{Binding AxisMin}"
+                                            Unit="1">
                                                 <lvc:Axis.Separator>
                                                     <lvc:Separator  Step="1" />
                                                 </lvc:Axis.Separator>
                                             </lvc:Axis>
-                                            <lvc:DateAxis
-    
-                                />
+                                            <lvc:DateAxis/>
                                         </lvc:CartesianChart.AxisX>
                                         <lvc:CartesianChart.AxisY>
                                             <lvc:Axis  LabelFormatter="{Binding YFormatter}"  >
-
+                                                <lvc:Axis.Sections  >
+                                                    <lvc:AxisSection  Value="{Binding Value, ElementName=sliderDist}" StrokeThickness="2" Stroke="#FFD8521F" DisableAnimations="True">
+                                                        <lvc:AxisSection.Fill>
+                                                            <SolidColorBrush Color="#A3A3FF" Opacity=".4"></SolidColorBrush>
+                                                        </lvc:AxisSection.Fill>
+                                                    </lvc:AxisSection>
+                                                </lvc:Axis.Sections>
                                                 <lvc:Axis.Separator >
                                                     <lvc:Separator Step="1" StrokeThickness="0.1" StrokeDashArray="20" Stroke="#FF122730" />
                                                 </lvc:Axis.Separator>
@@ -206,15 +213,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <d3:ChartPlotter x:Name="plotterTimeLine" Margin="0" Grid.RowSpan="2">
-                        <d3:CursorCoordinateGraph  AutoHide="False"  LineStroke="Aqua" />
-                        <d3:VerticalAxisTitle x:Name="axisTitle" Content="距离(cm)"/>
-                        <d3:HorizontalAxisTitle Content="时间"/>
-                        <d3:AxisCursorGraph ShowHorizontalLine="True" />
-                        <d3:LineGraph x:Name="lineGraph"  Stroke="OrangeRed" StrokeThickness="1"/>
 
-                    </d3:ChartPlotter>
-                    <!--Here we disable tooltips and hovering to get a better performance-->
                 </Grid>
             </TabItem>
         </TabControl>
