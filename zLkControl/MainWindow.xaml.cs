@@ -42,6 +42,7 @@ namespace zLkControl
 
         //tf
         private info infoWin;
+        private Setting settingWin;
         private SensorDataAcquirer Lk_Serial = new SensorDataAcquirer();
         LKSensorCmd LKSensorCmd = new LKSensorCmd();
         NotifyBase models = new NotifyBase();
@@ -64,22 +65,21 @@ namespace zLkControl
         //cmd
         sendDataitem send_msg = new sendDataitem();
         //lk
-        bool isCMDSent;
-        private int offset;  //偏移量
-        private Queue<double> DistHistory = new Queue<double>();  //距离历史数据
 
-  //struct
-        public param_ lk_parm = new param_();
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
-        public struct param_
-        {
-            public byte product;        //产品号
-            public UInt32 baud_rate;    //波特率
-            public UInt16 limit_dist;  //门限距离
-            public byte isLedOn;        //激光是否打开, 打开：1 ;关闭：0
-            public byte isBase;        //是否是后基准  前基准： 1 ；后基准：0
-            public byte ifHasConfig;    //是否传感器已经配置完成
-        };
+       // public static lk_param lk_Param_ = new lk_param();           //lk 传感器参数
+       
+        //struct
+        //public param_ lk_parm = new param_();
+        //[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+        //public struct param_
+        //{
+        //    public byte product;        //产品号
+        //    public UInt32 baud_rate;    //波特率
+        //    public UInt16 limit_dist;  //门限距离
+        //    public byte isLedOn;        //激光是否打开, 打开：1 ;关闭：0
+        //    public byte isBase;        //是否是后基准  前基准： 1 ；后基准：0
+        //    public byte ifHasConfig;    //是否传感器已经配置完成
+        //};
 
         public MainWindow()
         {
@@ -256,23 +256,18 @@ namespace zLkControl
         void ParmaRevFunc(byte[] buf, SensorDataItem sensor)
         {
             byte[] lkData = buf;
-            lk_parm = sensor.structHelper.ByteToStruct<param_>(sensor.dataBuff);
+            
+            lk_param.lk_parm_s = sensor.structHelper.ByteToStruct<lk_param.Param_>(sensor.dataBuff);
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
-                string baud= lk_parm.baud_rate.ToString();
-               // ellipse_led.DataContext = models;
-                sliderDist.Value = lk_parm.limit_dist;
-
-                ledStatuShake();
-                //  lk_parm.baud_rate.ToString;
-                BaudRateParm.Text = lk_parm.baud_rate.ToString();  //这里改变了波特率
-                LKSensorCmd.parmBarudIndex = BaudRateParm.SelectedIndex;
-                BaudRateParm.SelectionChanged += Baud_Rate_MoseDown; //波特率改变触发事件，在这调用防止上位机获取参数时候触发
-                if (lk_parm.product==0x02)
+                string baud= lk_param.lk_parm_s.baud_rate.ToString();
+                
+                ledStatuShake();   //提示参数接收指示灯
+                if (lk_param.lk_parm_s.product==0x02)
                 {
                     labelProduct.Content = "LK03";
                 }
-                if(lk_parm.isLedOn == 0x01)  //红外激光
+                if(lk_param.lk_parm_s.isLedOn == 0x01)  //红外激光
                 {
                     checkBox_red.IsChecked = true;
                     LKSensorCmd.isRedLedOn = true;
@@ -282,7 +277,7 @@ namespace zLkControl
                     LKSensorCmd.isRedLedOn = false;
                     checkBox_red.IsChecked = false;
                 }
-                if(lk_parm.isBase == 0x00)    //后基准
+                if(lk_param.lk_parm_s.isBase == 0x00)    //后基准
                 {
                     RadioBtn_Front.IsChecked = false;
                     RadioBtn_Base.IsChecked = true;
@@ -308,7 +303,6 @@ namespace zLkControl
                 sendTextBox.KeyDown += send_TxBx_kendown;
                 initBaudRate(BarudRate);
                 BarudRate.Text = "115200";
-                initBaudRate(BaudRateParm);
                 SensorDataAcquirer mainDataAcquirer = this.Lk_Serial;
                 //add id listen
                 //  mainDataAcquirer.lkFrame.addIDlistener(LK03_DISPLAY_ID, idfunc);
@@ -431,15 +425,7 @@ namespace zLkControl
                                                             fontsize, Brushes.Black);
             return new Size(formattedText.Width, formattedText.Height);
         }
-        //private Size MeasureText(string text, FontFamily fontFamily,
-        //                                        FontStyle fontStyle, FontWeight fontWeight,
-        //                                        FontStretch fontStretch, double fontsize)
-        //{
-        //    Typeface typeface = new Typeface(fontFamily, fontStyle, fontWeight, fontStretch);
-        //    GlyphTypeface glyphTypeface;
-        //    if(!typeface)
-        //    return new Size(formattedText.Width, formattedText.Height);
-        //}
+
 
         //设置滚动条显示到末尾
         private void ReceiveTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -553,7 +539,6 @@ namespace zLkControl
             checkBox_red.IsEnabled = v;
             RadioBtn_Front.IsEnabled = v;
             RadioBtn_Base.IsEnabled = v;
-            Btn_LimitDist_Set.IsEnabled = v;
             Btn_Get_Parm.IsEnabled = v;
             Btn_Once.IsEnabled = v;
             Btn_Continue.IsEnabled = v;
@@ -625,11 +610,11 @@ namespace zLkControl
 
             if (data.isReceveSucceed) //是否已经接收完成
             {
-                this.isCMDSent = true;
+               
             }
                 if(!TransParam.IsPixOn)  //打开偏移校准数据
                 {
-                    data.dist = (double)(data.dist - this.offset);
+                   
                 }
                 else
                 {
@@ -727,37 +712,6 @@ namespace zLkControl
             ShowData(send_msg.sendFrame, null);
         }
 
-        //门限距离触发
-        private void Limit_Dist_PamClick(object sender, RoutedEventArgs e)
-        {
-            MessageBoxResult dr = MessageBox.Show("是否配置触发距离" + (string)sliderDist.Value.ToString() + "m", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
-            if (dr == MessageBoxResult.OK)
-            {
-
-            }
-            else
-            {
-                sliderDist.Value = lk_parm.limit_dist;
-            }
-        }
-        private void textBox_Enter(object sender, KeyEventArgs e)
-        {
-          
-            if (e.Key == Key.Enter)
-            {
-                sliderDist.Value = int.Parse(textBox_LimitTrig.Text);
-                
-                MessageBoxResult dr = MessageBox.Show("是否配置触发距离" + textBox_LimitTrig.Text + "m", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
-                if (dr == MessageBoxResult.OK)
-                {
-
-                }
-                else
-                {
-                    sliderDist.Value = lk_parm.limit_dist;
-                }
-            }    
-        }
 
         //前基准
         private void radioBtn_front_click(object sender, RoutedEventArgs e)
@@ -891,27 +845,7 @@ namespace zLkControl
         private void Baud_Rate_MoseDown(object sender, SelectionChangedEventArgs e)
         {
 
-            MessageBoxResult dr = MessageBox.Show(Application.Current.MainWindow,"是否确定波特率" + (string)BaudRateParm.SelectedItem, "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
-
-            if (dr == MessageBoxResult.OK)
-            {
-                if (Lk_Serial.check())
-                {
-                    send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.ParmsSave);
-                    send_msg.id = (byte)(LKSensorCmd.FRAME_ParmSaveID.BarudSave);
-                    send_msg.ifHeadOnly = false;  //含有数据帧
-                    int baud = int.Parse((string)BaudRateParm.SelectedItem); 
-                    send_msg.sendbuf = BitConverter.GetBytes(baud);    //数据帧缓存
-                    send_msg.len = LKSensorCmd.parmBarudRateByteSize; //数据帧字节长度
-                    Lk_Serial.SendMsg(send_msg);
-                }
-            }
-            else
-            {
-                BaudRateParm.SelectionChanged -= Baud_Rate_MoseDown;
-                BaudRateParm.SelectedIndex = LKSensorCmd.parmBarudIndex;
-                BaudRateParm.SelectionChanged += Baud_Rate_MoseDown;
-            }
+         
 
         }
         /*开机自动测量*/
@@ -1174,7 +1108,18 @@ namespace zLkControl
 
         private void Btn_Clicked_Setting(object sender, RoutedEventArgs e)
         {
+            settingWin = new Setting(this);
+            settingWin.Owner = this;
+            
+            settingWin.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            settingWin.sliderDist.Value = lk_param.lk_parm_s.limit_dist;
 
+            
+            //  lk_parm.baud_rate.ToString;
+            settingWin.BaudRateParm.Text = lk_param.lk_parm_s.baud_rate.ToString();  //这里改变了波特率
+            LKSensorCmd.parmBarudIndex = settingWin.BaudRateParm.SelectedIndex;
+            settingWin.BaudRateParm.SelectionChanged += Baud_Rate_MoseDown; //波特率改变触发事件，在这调用防止上位机获取参数时候触发
+            settingWin.ShowDialog();
         }
     }
 
