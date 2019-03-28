@@ -18,6 +18,7 @@ namespace zLkControl
             public byte isLedOn;        //激光是否打开, 打开：1 ;关闭：0
             public byte isBase;        //是否是后基准  前基准： 1 ；后基准：0
             public byte ifHasConfig;    //是否传感器已经配置完成
+            public UInt16 dataFreq;    //数据输出频率
         };
         public static Param_ lk_parm_s = new Param_();
     }

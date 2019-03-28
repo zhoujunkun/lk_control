@@ -16,6 +16,7 @@
         <Slider x:Name="sliderDist" Maximum="500" IsSnapToTickEnabled="True" IsSelectionRangeEnabled="True"   HorizontalAlignment="Left" Margin="19.557,48,0,0" VerticalAlignment="Top" Width="204" Height="21"/>
         <TextBox HorizontalAlignment="Left" x:Name="textBox_LimitTrig" PreviewKeyDown ="textBox_Enter" Text="{Binding Value, ElementName=sliderDist, Mode=TwoWay}" Height="23" Margin="19.557,74,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="68" BorderBrush="#FF093771"/>
         <Label Content="m" HorizontalAlignment="Left" Margin="96.357,69,0,0" VerticalAlignment="Top" FontSize="18" Width="29" RenderTransformOrigin="0,0.304"/>
+        <TextBlock HorizontalAlignment="Left" Text="{Binding Value, ElementName=sliderDist}" Margin="227,50,0,0" TextWrapping="Wrap"  VerticalAlignment="Top"/>
 
     </Grid>
 </controls:MetroWindow>

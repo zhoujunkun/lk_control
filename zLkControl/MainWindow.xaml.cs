@@ -162,7 +162,7 @@ namespace zLkControl
 
             while (IsReading)
             {
-                Thread.Sleep(10);
+                Thread.Sleep(50);
                 SetAxisLimits();
                 _trend = r.Next(40, 50);
                 time_count++;
@@ -261,8 +261,14 @@ namespace zLkControl
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
                 string baud= lk_param.lk_parm_s.baud_rate.ToString();
-                
                 ledStatuShake();   //提示参数接收指示灯
+                //波特率
+                settingWin.sliderDist.Value = lk_param.lk_parm_s.limit_dist;
+                settingWin.BaudRateParm.Text = lk_param.lk_parm_s.baud_rate.ToString();  //这里改变了波特率
+                LKSensorCmd.parmBarudIndex = settingWin.BaudRateParm.SelectedIndex;
+                settingWin.BaudRateParm.SelectionChanged += Baud_Rate_MoseDown; //波特率改变触发事件，在这调用防止上位机获取参数时候触发
+                //输出频率
+                sliderFreq.Value = lk_param.lk_parm_s.dataFreq;
                 if (lk_param.lk_parm_s.product==0x02)
                 {
                     labelProduct.Content = "LK03";
@@ -297,8 +303,9 @@ namespace zLkControl
         {
             try
             {
-                //led 
-                // Lk_Serial.addFrameAnys(anysFrame);
+                //setting windows
+                settingWin = new Setting(this);
+                settingWin.Owner = this;
                 //
                 sendTextBox.KeyDown += send_TxBx_kendown;
                 initBaudRate(BarudRate);
@@ -1107,18 +1114,8 @@ namespace zLkControl
         }
 
         private void Btn_Clicked_Setting(object sender, RoutedEventArgs e)
-        {
-            settingWin = new Setting(this);
-            settingWin.Owner = this;
-            
+        {     
             settingWin.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            settingWin.sliderDist.Value = lk_param.lk_parm_s.limit_dist;
-
-            
-            //  lk_parm.baud_rate.ToString;
-            settingWin.BaudRateParm.Text = lk_param.lk_parm_s.baud_rate.ToString();  //这里改变了波特率
-            LKSensorCmd.parmBarudIndex = settingWin.BaudRateParm.SelectedIndex;
-            settingWin.BaudRateParm.SelectionChanged += Baud_Rate_MoseDown; //波特率改变触发事件，在这调用防止上位机获取参数时候触发
             settingWin.ShowDialog();
         }
     }

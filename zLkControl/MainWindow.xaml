@@ -80,6 +80,9 @@
                                         <Controls:ToggleSwitch Header="辅助红外激光" IsEnabled="False" x:Name="checkBox_red"  Click="checkBox_red_click"  RenderTransformOrigin="0.413,0.508" Margin="10,0,167,108" Foreground="#FFA46161" ThumbIndicatorBrush="#FF4F9B9B" Grid.Row="1" Height="59" VerticalAlignment="Bottom"/>
                                         <Controls:ToggleSwitch Header="通电自动测量" IsEnabled="False" x:Name="checkBox_Atuo_Che"  Click="checkBox_Atuo_click"  RenderTransformOrigin="0.413,0.508" Margin="151,0,23,107" Foreground="#FFA46161" ThumbIndicatorBrush="#FF4F9B9B" Grid.Row="1" Height="60" VerticalAlignment="Bottom"/>
                                         <Button Content="Button" Click="InjectStopOnClick" HorizontalAlignment="Left" Margin="189,276,0,0" VerticalAlignment="Top" Width="75"/>
+                                        <Slider  HorizontalAlignment="Left" TickFrequency="10"  Maximum="1000" IsSnapToTickEnabled="True" Name="sliderFreq" Margin="14,37,0,0" VerticalAlignment="Top" Height="16" Width="220"/>
+                                        <TextBlock HorizontalAlignment="Left" Text="{Binding Value, ElementName=sliderFreq}" Margin="161,6,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" FontSize="20" Width="90" RenderTransformOrigin="-1.382,0.702"/>
+                                        <TextBlock HorizontalAlignment="Left" Margin="9,3,0,0" TextWrapping="Wrap" Text="输出频率(HZ)：" VerticalAlignment="Top" FontSize="20" Height="28" Width="145"/>
                                     </Grid>
                                 </TabItem>
                                 <TabItem Header="测速" FontSize="11">
