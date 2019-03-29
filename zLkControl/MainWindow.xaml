@@ -54,11 +54,12 @@
                                 <TabItem x:Name="tableCe" Header="测量" FontSize="9">
                                     <Grid Background="#FFE5E5E5" Margin="0">
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="332*"/>
+                                            <RowDefinition Height="113*"/>
+                                            <RowDefinition Height="220*"/>
                                             <RowDefinition Height="169*"/>
                                         </Grid.RowDefinitions>
-                                        <Button  Content="单次" x:Name="Btn_Once" IsEnabled="False" Click="Btn_Once_Cmd" HorizontalAlignment="Left" Margin="26,0,0,144" Width="210" BorderBrush="#FF647878" FontSize="20" Background="{x:Null}" Foreground="#FFA46161" Height="60" VerticalAlignment="Bottom"/>
-                                        <Button Content="连续" x:Name="Btn_Continue" IsEnabled="False" Click="Btn_Contitue_Cmd" Margin="26,0,0,70.667" BorderBrush="#FF5F2828" Height="60" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="210" FontSize="20">
+                                        <Button  Content="单次" x:Name="Btn_Once" IsEnabled="False" Click="Btn_Once_Cmd" HorizontalAlignment="Left" Margin="27,0,0,149.333" Width="210" BorderBrush="#FF647878" FontSize="20" Background="{x:Null}" Foreground="#FFA46161" Height="60" VerticalAlignment="Bottom" Grid.Row="1"/>
+                                        <Button Content="连续" x:Name="Btn_Continue" IsEnabled="False" Click="Btn_Contitue_Cmd" Margin="26,0,0,70.333" BorderBrush="Black" Height="60" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="210" FontSize="20" Grid.Row="1">
                                             <Button.BitmapEffect>
                                                 <BevelBitmapEffect x:Name="testBe"
                                                                    BevelWidth="20"
@@ -68,21 +69,30 @@
                                                                    Smoothness="0.5"/>
                                             </Button.BitmapEffect>
                                         </Button>
-                                        <Button IsEnabled="False" Content="恢复出厂设置" Margin="167,0,0,35" BorderBrush="#FF975252" FontFamily="Microsoft YaHei UI" HorizontalAlignment="Left" Width="86" Click="reset_button_click" Height="27" RenderTransformOrigin="0.533,0.815" Grid.Row="1" VerticalAlignment="Bottom"/>
-                                        <Button Content="获取传感器参数" IsEnabled="False" Click="Btn_Click_getParam" x:Name="Btn_Get_Parm" HorizontalAlignment="Left" Margin="166,0,0,70" Width="86" FontWeight="Normal" FontSize="10" Grid.Row="1" Height="27" VerticalAlignment="Bottom"/>
-                                        <ProgressBar x:Name="progressBarUpdata" HorizontalAlignment="Left" Margin="148,0,0,10" Width="100" Grid.Row="1" Height="10" VerticalAlignment="Bottom" />
-                                        <Button Content="升级" HorizontalAlignment="Left" Margin="13,0,0,14" Width="41" Click="Updata_Click" Grid.Row="1" Height="31" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="{Binding Value, ElementName=sliderDist}" HorizontalAlignment="Left" Margin="221,53,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="51" FontSize="18" Foreground="#FFE83131"/>
+                                        <Button IsEnabled="False" Content="恢复出厂设置" Margin="167,0,0,34.666" BorderBrush="#FF975252" FontFamily="Microsoft YaHei UI" HorizontalAlignment="Left" Width="86" Click="reset_button_click" Height="27" RenderTransformOrigin="0.533,0.815" Grid.Row="2" VerticalAlignment="Bottom"/>
+                                        <Button Content="获取传感器参数" IsEnabled="False" Click="Btn_Click_getParam" x:Name="Btn_Get_Parm" HorizontalAlignment="Left" Margin="166,0,0,69.666" Width="86" FontWeight="Normal" FontSize="10" Grid.Row="2" Height="27" VerticalAlignment="Bottom"/>
+                                        <ProgressBar x:Name="progressBarUpdata" HorizontalAlignment="Left" Margin="148,0,0,9.666" Width="100" Grid.Row="2" Height="10" VerticalAlignment="Bottom" />
+                                        <TextBlock Text="{Binding Value, ElementName=sliderLimitTrig}" HorizontalAlignment="Left" Margin="146,64,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="91" FontSize="20" Foreground="#FF298BF2"/>
 
-                                        <RadioButton IsEnabled="False" Click="radioBtn_front_click" x:Name="RadioBtn_Front" Content="前基准测量" HorizontalAlignment="Left" Margin="11,0,0,84" Width="90" RenderTransformOrigin="0.422,1.667" Foreground="#FFA46161" Grid.Row="1" Height="18" VerticalAlignment="Bottom"/>
-                                        <RadioButton IsEnabled="False" Click="radioBtn_base_click"  x:Name="RadioBtn_Base"  Content="后基准测量" HorizontalAlignment="Left" Margin="11,0,0,61" RenderTransformOrigin="0.393,1.111" Foreground="#FFA46161" Grid.Row="1" Height="18" VerticalAlignment="Bottom"/>
-                                        <Button Content="Stop" IsEnabled="False" x:Name="Btn_Stop" Click="Btn_Click_Stop" HorizontalAlignment="Left" Margin="83,0,0,16" Width="91" FontSize="20" BorderBrush="#FFCF0000" FontWeight="Bold" Height="41" VerticalAlignment="Bottom"/>
-                                        <Controls:ToggleSwitch Header="辅助红外激光" IsEnabled="False" x:Name="checkBox_red"  Click="checkBox_red_click"  RenderTransformOrigin="0.413,0.508" Margin="10,0,167,108" Foreground="#FFA46161" ThumbIndicatorBrush="#FF4F9B9B" Grid.Row="1" Height="59" VerticalAlignment="Bottom"/>
-                                        <Controls:ToggleSwitch Header="通电自动测量" IsEnabled="False" x:Name="checkBox_Atuo_Che"  Click="checkBox_Atuo_click"  RenderTransformOrigin="0.413,0.508" Margin="151,0,23,107" Foreground="#FFA46161" ThumbIndicatorBrush="#FF4F9B9B" Grid.Row="1" Height="60" VerticalAlignment="Bottom"/>
-                                        <Button Content="Button" Click="InjectStopOnClick" HorizontalAlignment="Left" Margin="189,276,0,0" VerticalAlignment="Top" Width="75"/>
-                                        <Slider  HorizontalAlignment="Left" TickFrequency="10"  Maximum="1000" IsSnapToTickEnabled="True" Name="sliderFreq" Margin="14,37,0,0" VerticalAlignment="Top" Height="16" Width="220"/>
-                                        <TextBlock HorizontalAlignment="Left" Text="{Binding Value, ElementName=sliderFreq}" Margin="161,6,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" FontSize="20" Width="90" RenderTransformOrigin="-1.382,0.702"/>
-                                        <TextBlock HorizontalAlignment="Left" Margin="9,3,0,0" TextWrapping="Wrap" Text="输出频率(HZ)：" VerticalAlignment="Top" FontSize="20" Height="28" Width="145"/>
+                                        <RadioButton IsEnabled="False" Click="radioBtn_front_click" x:Name="RadioBtn_Front" Content="前基准测量" HorizontalAlignment="Left" Margin="11,0,0,83.666" Width="90" RenderTransformOrigin="0.422,1.667" Foreground="#FFA46161" Grid.Row="2" Height="18" VerticalAlignment="Bottom"/>
+                                        <RadioButton IsEnabled="False" Click="radioBtn_base_click"  x:Name="RadioBtn_Base"  Content="后基准测量" HorizontalAlignment="Left" Margin="11,0,0,60.666" RenderTransformOrigin="0.393,1.111" Foreground="#FFA46161" Grid.Row="2" Height="18" VerticalAlignment="Bottom"/>
+                                        <Controls:ToggleSwitch Header="辅助红外激光" IsEnabled="False" x:Name="checkBox_red"  Click="checkBox_red_click"  RenderTransformOrigin="0.413,0.508" Margin="10,0,167,107.666" Foreground="#FFA46161" ThumbIndicatorBrush="#FF4F9B9B" Grid.Row="2" Height="59" VerticalAlignment="Bottom"/>
+                                        <Controls:ToggleSwitch Header="通电自动测量" IsEnabled="False" x:Name="checkBox_Atuo_Che"  Click="checkBox_Atuo_click"  RenderTransformOrigin="0.413,0.508" Margin="151,0,23,106.666" Foreground="#FFA46161" ThumbIndicatorBrush="#FF4F9B9B" Grid.Row="2" Height="60" VerticalAlignment="Bottom"/>
+
+                                        <Button  BorderThickness="9" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Content="Button" Click="InjectStopOnClick" HorizontalAlignment="Left" Margin="133,155.667,0,0" VerticalAlignment="Top" Width="52" Grid.Row="1" Height="54"/>
+                                        <Slider  HorizontalAlignment="Left" TickFrequency="10"  Maximum="1000" IsSnapToTickEnabled="True" Name="sliderFreq" Margin="9,33,0,0" VerticalAlignment="Top" Height="16" Width="220"/>
+                                        <TextBlock HorizontalAlignment="Left" Text="{Binding Value, ElementName=sliderFreq}" Margin="147,4,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" FontSize="20" Width="90" RenderTransformOrigin="-1.382,0.702" Foreground="#FF298BF2"/>
+                                        <TextBlock HorizontalAlignment="Left" Margin="9,3,0,0" TextWrapping="Wrap" Text="输出频率(HZ)：" VerticalAlignment="Top" FontSize="18" Height="28" Width="136" FontWeight="Bold"/>
+                                        <Slider x:Name="sliderLimitTrig" Maximum="500" IsSnapToTickEnabled="True" IsSelectionRangeEnabled="True"   HorizontalAlignment="Left" Margin="9,86,0,0" VerticalAlignment="Top" Width="218" Height="21"/>
+                                        <TextBlock HorizontalAlignment="Left" Margin="9,64,0,0" TextWrapping="Wrap" Text="触发距离(cm) :" VerticalAlignment="Top" FontSize="18" FontWeight="Bold" Width="129"/>
+                                        <StackPanel HorizontalAlignment="Left" Height="28" Margin="21,127.667,0,0" Grid.Row="2" VerticalAlignment="Top" Width="38"/>
+                                        <Button  BorderThickness="0"  Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}"  HorizontalAlignment="Left" Margin="16,0,0,6.667" Width="40" Click="Updata_Click" Height="40" VerticalAlignment="Bottom" RenderTransformOrigin="0.341,0.156" Background="{x:Null}" Foreground="{x:Null}" BorderBrush="Black" Grid.Row="2">
+                                            <Grid>
+                                                <StackPanel HorizontalAlignment="Left" Height="28" Margin="0" Grid.Row="2" VerticalAlignment="Top" Width="38">
+                                                    <iconPacks:PackIconMaterial Kind="ArrowCollapseDown" RenderTransformOrigin="5.083,8.823" Height="20" Width="37" Foreground="Black" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Button>
                                     </Grid>
                                 </TabItem>
                                 <TabItem Header="测速" FontSize="11">
@@ -94,7 +104,6 @@
                                         <Label Content="km/h" HorizontalAlignment="Left" Margin="102,208,0,0" VerticalAlignment="Top" Width="55" FontSize="18" Height="33"/>
                                         <Button Content="开始测速" Click="Btn_Clicked_SpeedStart" HorizontalAlignment="Left" Margin="149,309,0,0" VerticalAlignment="Top" Width="96" FontSize="20" Height="41"/>
                                         <Button Content="停止测速" Click="Btn_Clicked_SpeedStop" HorizontalAlignment="Left" Margin="23,309,0,0" VerticalAlignment="Top" Width="96" FontSize="20" Height="41"/>
-
                                         <lvc:AngularGauge Name="speedAngular" Value="20" FromValue="20" ToValue="200" 
                                               LabelsStep="20" TicksStep="10" Wedge="297"
                                               TicksForeground="#FF334164" Foreground="White" 
@@ -108,7 +117,7 @@
                                     </Grid>
                                 </TabItem>
                             </TabControl>
-                            <GroupBox Header="GroupBox" Margin="283,0,0,10" Background="#CC30BCE6">
+                            <GroupBox Header="曲线" Margin="283,0,0,10" Background="#CC649497">
                                 <Grid Margin="0">
 
                                     <lvc:CartesianChart x:Name="chartDisplay"
@@ -204,7 +213,15 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-
+                    <StackPanel>
+                        <iconPacks:PackIconMaterial Kind="ArrowCollapseDown" RenderTransformOrigin="5.083,8.823" Height="50" Width="72" />
+                        <iconPacks:PackIconMaterialLight Kind="Heart" Height="104" Width="122" />
+                        <iconPacks:PackIconFontAwesome Kind="FontAwesomeBrands" />
+                        <iconPacks:PackIconOcticons Kind="MarkGithub" Height="58" Width="77" />
+                        <iconPacks:PackIconModern Kind="ThumbsUp" />
+                        <iconPacks:PackIconEntypo Kind="EmojiHappy" Height="72" Width="132" />
+                        <iconPacks:PackIconSimpleIcons Kind="StackOverflow" />
+                    </StackPanel>
                 </Grid>
             </TabItem>
         </TabControl>

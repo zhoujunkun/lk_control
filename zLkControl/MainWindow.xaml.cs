@@ -549,7 +549,6 @@ namespace zLkControl
             Btn_Get_Parm.IsEnabled = v;
             Btn_Once.IsEnabled = v;
             Btn_Continue.IsEnabled = v;
-            Btn_Stop.IsEnabled = v;
             checkBox_Atuo_Che.IsEnabled = v;
         }
         
@@ -710,15 +709,44 @@ namespace zLkControl
             }
         }
         //连续测量
+        private bool ifcontinueDist= true;
         public void Btn_Contitue_Cmd(object sender, RoutedEventArgs e)
         {
-            send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.DataGet);
-            send_msg.id = (byte)(LKSensorCmd.FRAME_GetDataID.DistContinue);
-            send_msg.ifHeadOnly = true;
-            Lk_Serial.SendMsg(send_msg);
+            if(ifcontinueDist)
+            {
+                send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.DataGet);
+                send_msg.id = (byte)(LKSensorCmd.FRAME_GetDataID.DistContinue);
+                send_msg.ifHeadOnly = true;
+                Lk_Serial.SendMsg(send_msg);
+                Btn_Continue.Content = "停止";
+                ifcontinueDist = false;
+                ShowOrHideComponentsConti(false);
+            }
+            else
+            {
+                Btn_Continue.Content = "连续";
+                ifcontinueDist = true;
+                send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.DataGet);
+                send_msg.id = (byte)(LKSensorCmd.FRAME_GetDataID.DistStop);
+                send_msg.ifHeadOnly = true;
+                Lk_Serial.SendMsg(send_msg);
+                ShowOrHideComponentsConti(true);
+            }
             ShowData(send_msg.sendFrame, null);
-        }
 
+        }
+        private void ShowOrHideComponentsConti(bool v)
+        {
+            sendTextBox.IsEnabled = v;
+            SerPort.IsEnabled = !v;
+            BarudRate.IsEnabled = !v;
+            checkBox_red.IsEnabled = v;
+            RadioBtn_Front.IsEnabled = v;
+            RadioBtn_Base.IsEnabled = v;
+            Btn_Get_Parm.IsEnabled = v;
+            Btn_Once.IsEnabled = v;
+            checkBox_Atuo_Che.IsEnabled = v;
+        }
 
         //前基准
         private void radioBtn_front_click(object sender, RoutedEventArgs e)
