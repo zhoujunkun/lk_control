@@ -41,9 +41,10 @@ namespace zLkControl
         public double AxisUnit { get; set; }
 
         //tf
+        float dist;  //距离值
         private info infoWin;
         private Setting settingWin;
-        private SensorDataAcquirer Lk_Serial = new SensorDataAcquirer();
+        public SensorDataAcquirer Lk_Serial = new SensorDataAcquirer();
         LKSensorCmd LKSensorCmd = new LKSensorCmd();
         NotifyBase models = new NotifyBase();
         private System.Timers.Timer timerEftPtsCounter;
@@ -63,7 +64,7 @@ namespace zLkControl
         int count_texbox; //显示帧数
 
         //cmd
-        sendDataitem send_msg = new sendDataitem();
+        public sendDataitem send_msg = new sendDataitem();
         //lk
 
        // public static lk_param lk_Param_ = new lk_param();           //lk 传感器参数
@@ -200,31 +201,62 @@ namespace zLkControl
 
 
         #endregion
-
-
-
-        // lk id listenr
-        const int LK03_DISPLAY_ID = 0X80;
-        void idfunc(byte[] buf, SensorDataItem sensor)
+        //lk general listenr
+        void genralFunc( SensorDataItem sensor)
         {
-            byte[] lkData = buf;
-            base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
+            byte[] lkData = sensor.buf;
+            LKSensorCmd.FRAME_TYPE frame_type = (LKSensorCmd.FRAME_TYPE)(sensor.type);
+            switch (frame_type)
             {
-               // ShowData(buf, sensor);
-            }), new object[0]);
+                case LKSensorCmd.FRAME_TYPE.DataGet:
+                    {
+
+                    }break;
+                case LKSensorCmd.FRAME_TYPE.ParmsSave:
+                    {
+
+                    }
+                    break;
+                case LKSensorCmd.FRAME_TYPE.ParamGet:
+                    {
+
+                    }
+                    break;
+                case LKSensorCmd.FRAME_TYPE.Upload:
+                    {
+
+                    }
+                    break;
+                case LKSensorCmd.FRAME_TYPE.ACK:
+                    {
+                        LKSensorCmd.FRAME_AckID ack_id = (LKSensorCmd.FRAME_AckID)(sensor.id);
+                        settingWin.ackCallback(ack_id);
+                    }
+                    break;
+                case LKSensorCmd.FRAME_TYPE.Erro:
+                    {
+
+                    }
+                    break;
+                default:
+                    break;
+            }
+
         }
+       
+      
+
         //lk type listenr
         const int LK03_DISPLAY_TYPE = (int)(LKSensorCmd.FRAME_TYPE.DataGet);
         const int LK03_PARM_TYPE = (int) (LKSensorCmd.FRAME_TYPE.ParamGet);
-        const int LK_Speed_Type = (int)(LKSensorCmd.FRAME_TYPE.SPEED_CTL);
         int data_counts;
-        void typefunc(byte[] buf, SensorDataItem sensor)
+        void typefunc( SensorDataItem sensor)
         {
-            byte[] lkData = buf;
+            byte[] lkData = sensor.buf;
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
-                ShowData(buf,sensor);
-                sensor.dist = buf[1] << 8 | buf[0];
+                ShowData(sensor.buf, sensor);
+                dist = sensor.buf[1] << 8 | sensor.buf[0];
                 data_counts++;
                 if (data_counts > 20)
                 {
@@ -236,28 +268,18 @@ namespace zLkControl
                 ChartValues.Add(new MeasureModel
                 {
                     DateTime = data_counts,
-                    Value = sensor.dist/100,
+                    Value = dist / 100,
                 });
-                DistTextBlock.Text = sensor.dist.ToString();
-            }), new object[0]);
-        }
-        void typeSpeedfunc(byte[] buf, SensorDataItem sensor)
-        {
-            byte[] lkData = buf;
-            base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
-            {
-                ShowData(buf, sensor);
-                sensor.speed = buf[1] << 8 | buf[0];
-                speedAngular.Value = sensor.speed / 10;
-                speed_display.Text = speedAngular.Value.ToString();
+                DistTextBlock.Text = dist.ToString();
             }), new object[0]);
         }
 
-        void ParmaRevFunc(byte[] buf, SensorDataItem sensor)
+
+        void ParmaRevFunc(SensorDataItem sensor)
         {
-            byte[] lkData = buf;
+            byte[] lkData = sensor.buf;
             
-            lk_param.lk_parm_s = sensor.structHelper.ByteToStruct<lk_param.Param_>(sensor.dataBuff);
+            lk_param.lk_parm_s = sensor.structHelper.ByteToStruct<lk_param.Param_>(sensor.buf);
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
                 string baud= lk_param.lk_parm_s.baud_rate.ToString();
@@ -315,7 +337,7 @@ namespace zLkControl
                 //  mainDataAcquirer.lkFrame.addIDlistener(LK03_DISPLAY_ID, idfunc);
                 mainDataAcquirer.lkFrame.addTYPElistener(LK03_DISPLAY_TYPE, typefunc);
                 mainDataAcquirer.lkFrame.addTYPElistener(LK03_PARM_TYPE, ParmaRevFunc);
-                mainDataAcquirer.lkFrame.addTYPElistener(LK_Speed_Type, typeSpeedfunc);
+                mainDataAcquirer.lkFrame.addGenralListener(genralFunc);
                 //plot
                 //Value = 160;
                 //
@@ -408,7 +430,7 @@ namespace zLkControl
             {
                 count_texbox++;
                 recieveTextBox.AppendText("******** MaiChe  Technology RxMsg ********" +
-                                          "\n" + " Dist: " + sensor.dist.ToString() +
+                                          "\n" + " Dist: " + dist.ToString() +
                                           "\nTYPE: 0x" + sensor.stringByteToString(sensor.type) +
                                           "\nLens: 0x" + sensor.stringByteToString((byte)(sensor.len >> 8)) + "0x" + sensor.stringByteToString((byte)(sensor.len &0xff)) +
                                           "\nid: " + sensor.stringByteToString(sensor.id) + " Counts: " + count_texbox.ToString() +
@@ -618,16 +640,7 @@ namespace zLkControl
             {
                
             }
-                if(!TransParam.IsPixOn)  //打开偏移校准数据
-                {
-                   
-                }
-                else
-                {
-                    data.dist *= 100; //接收数据*100cm = 米
-                }
-
-                this.PointNum += 1L;
+        
 
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
@@ -649,28 +662,28 @@ namespace zLkControl
                 ErrorLog.WriteLog(ex, "");
             }
         }
-        #region 测速
-        //开始测速
-        public void Btn_Clicked_SpeedStart(object sender, RoutedEventArgs e)
-        {
-            send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.SPEED_CTL);
-            send_msg.id = (byte)(LKSensorCmd.FRAME_SpeeCtlID.START);
-            send_msg.ifHeadOnly = true;
-            Lk_Serial.SendMsg(send_msg);
-            ShowData(send_msg.sendFrame, null);
-        }
-        //停止测速
-        public void Btn_Clicked_SpeedStop(object sender, RoutedEventArgs e)
-        {
-            send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.SPEED_CTL);
-            send_msg.id = (byte)(LKSensorCmd.FRAME_SpeeCtlID.STOP);
-            send_msg.ifHeadOnly = true;
-            Lk_Serial.SendMsg(send_msg);
-            ShowData(send_msg.sendFrame, null);
-        }
+        //#region 测速
+        ////开始测速
+        //public void Btn_Clicked_SpeedStart(object sender, RoutedEventArgs e)
+        //{
+        //    send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.SPEED_CTL);
+        //    send_msg.id = (byte)(LKSensorCmd.FRAME_SpeeCtlID.START);
+        //    send_msg.ifHeadOnly = true;
+        //    Lk_Serial.SendMsg(send_msg);
+        //    ShowData(send_msg.sendFrame, null);
+        //}
+        ////停止测速
+        //public void Btn_Clicked_SpeedStop(object sender, RoutedEventArgs e)
+        //{
+        //    send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.SPEED_CTL);
+        //    send_msg.id = (byte)(LKSensorCmd.FRAME_SpeeCtlID.STOP);
+        //    send_msg.ifHeadOnly = true;
+        //    Lk_Serial.SendMsg(send_msg);
+        //    ShowData(send_msg.sendFrame, null);
+        //}
 
 
-        #endregion
+        //#endregion
 
 
 
@@ -1094,14 +1107,6 @@ namespace zLkControl
             }));
             thread.Start();
         }
-
- 
-
-
-
-
-
-
 
         //about
         private void Btn_Clicked_About(object sender, RoutedEventArgs e)

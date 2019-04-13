@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace zLkControl
 {
-    class thinyFrame
+   public class thinyFrame
     {
         /*
         ,-----+-----+-----+------+------------+- - - -+-------------,
@@ -25,13 +25,14 @@ namespace zLkControl
         DATA_CKSUM .. data checksum (left out if LEN is 0)
          * */
         static int MAX_TYPE_SIZE = 10;
-
+        static int MAX_GENERAL_SIZE = 10;
         checksum check_crc = new checksum();
         string state;
         int partlen;
         int cksum;
         byte peer;
         _idListenr idListenr = new _idListenr();
+        _generalListenr[] generalListenr = new _generalListenr[MAX_GENERAL_SIZE];
         _typeListenr[] typeListener = new _typeListenr[MAX_TYPE_SIZE];
         _message msg = new _message();
         public Queue<byte> headBuf = new Queue<byte>();
@@ -66,7 +67,7 @@ namespace zLkControl
            public byte frame_id ;   // the frame ID (MSb is the peer bit)
            public UInt16 len ;  //number of data bytes in the frame
            public byte type; //message type (used to run Type Listeners, pick any values you like)
-
+           
         }
 
         //数据解析
@@ -129,25 +130,24 @@ namespace zLkControl
                             crc = check_crc.crc16(buf);
                             if (crc == cksum)
                             {
-                                state = "data";
-
+                                if (msg.len == 0)  //无数据包
+                                {
+                                    resetParser();
+                                    lkSensor.isReceveSucceed = true;
+                                    lkSensor.Frame = lkSensor.fromHexToString(headBuf.ToArray());
+                                    lkSensor.buf = dataBuf.ToArray();
+                                    handleReceived(lkSensor);
+                                }
+                                else
+                                {
+                                    state = "data";
+                                }
                             }
                             else
                             {
                                 resetParser();
                                 break;
                             }
-                            cksum = 0;
-                            partlen = 0;
-                            headBuf.Clear();
-                        }
-                        if(msg.len == 0)
-                        {
-                            resetParser();
-                            cksum = 0;
-                            partlen = 0;
-                            headBuf.Clear();
-                            break;
                         }
                        
                     }
@@ -175,8 +175,8 @@ namespace zLkControl
                             {    
                                 lkSensor.isReceveSucceed = true;
                                 lkSensor.Frame = lkSensor.fromHexToString(frameBuf.ToArray());
-                                lkSensor.dataBuff= dataBuf.ToArray();
-                                handleReceived(buf, lkSensor);
+                                lkSensor.buf= dataBuf.ToArray();
+                                handleReceived(lkSensor);
                             }
                             else
                             {
@@ -191,23 +191,33 @@ namespace zLkControl
             }
         }
         //添加回调函数
-        public void handleReceived(byte[] buf, SensorDataItem lkSensor)
+        public void handleReceived(SensorDataItem lkSensor )
         {
             if (lkSensor.isReceveSucceed)
             {
                 lkSensor.id = msg.frame_id;
                 lkSensor.type = msg.type;
-                lkSensor.buf = buf;
                 lkSensor.len = msg.len;
                 if (msg.frame_id == idListenr.id)
                 {
-                    idListenr.Func.Invoke(buf, lkSensor);     //回调函数运行
+                    idListenr.Func.Invoke( lkSensor);     //回调函数运行
                 }
                 for (int i = 0; i < MAX_TYPE_SIZE; i++)
                 {
                     if(msg.type== typeListener[i].type)
                     {
-                        typeListener[i].Func.Invoke(buf, lkSensor);
+                        typeListener[i].Func.Invoke( lkSensor);
+                    }
+                }
+                for (int i = 0; i < MAX_GENERAL_SIZE; i++)
+                {
+                    if(generalListenr[i].Func == null)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        generalListenr[i].Func.Invoke( lkSensor);
                     }
                 }
             }
@@ -220,18 +230,37 @@ namespace zLkControl
             public int id;
             public myDelegate Func;
         };
+
+        struct _generalListenr
+        {
+            public myDelegate Func;
+        };
         struct _typeListenr
         {
             public int type;
             public myDelegate Func;
         };
 
-        public  delegate void myDelegate(byte[] buf, SensorDataItem lkSensor);
+        public  delegate void myDelegate(SensorDataItem lkSensor);
         public void addIDlistener(int _id, myDelegate listener)
         {
             idListenr.id = _id;
             idListenr.Func = listener;
         }
+        public void addGenralListener( myDelegate listener)
+        {
+            for (int i = 0; i < MAX_GENERAL_SIZE; i++)
+            {
+                if (generalListenr[i].Func == null)
+                {
+                    generalListenr[i].Func = listener;
+                    return;
+                }
+
+            }
+
+        }
+
         public void addTYPElistener(int _type, myDelegate listener)
         {
             

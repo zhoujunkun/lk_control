@@ -1,6 +1,6 @@
 ﻿namespace zLkControl
 {
-    class LKSensorCmd
+   public class LKSensorCmd
     {
         //id 类型命令分配
 /*
@@ -9,8 +9,9 @@
 |    1    |     4     |      2     |     1     |      1     | ...   |          | <- size (bytes)
 '---------+-----------+------------+-----------+------------+- - - -+-------------'         
 */
-        public enum FRAME_TYPE { DataGet = 1, ParmsSave,ParamGet,SPEED_CTL, Erro };
+        public enum  FRAME_TYPE { DataGet = 1, ParmsSave,ParamGet,Upload,ACK,Erro };
         public enum FRAME_GetDataID { DistOnce = 1, DistContinue,DistStop};
+        public enum FRAME_AckID {   downLoadBegin=1, upload };
         public enum FRAME_GetParamID {ParamAll=1};
         public enum FRAME_SpeeCtlID { START = 1,STOP };
         public enum FRAME_ParmSaveID { BarudSave = 1, RedLightSave, FrontOrBase,AutoMel};

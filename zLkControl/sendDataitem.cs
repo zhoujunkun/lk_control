@@ -2,7 +2,7 @@
 
 namespace zLkControl
 {
-    class sendDataitem
+   public class sendDataitem
     {
         public object LockThis = new object();
         public bool ifHeadOnly

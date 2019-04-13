@@ -3,29 +3,23 @@ using System.Runtime.InteropServices;
 using System.Text;
 namespace zLkControl
 {
-    class SensorDataItem
+   public class SensorDataItem
     {
-        public double dist { get; set; }  //接收到距离
-        public int speed { get; set; }    //速度值
         public byte type { get; set;  }
-
         public byte id { get; set; }
-
         public UInt16 len { get; set; }
-
-        public int offset { get; set; }   //偏移量
         public string Frame;   //完整接收帧字符串
         public bool isCMDReceived { get; set; }
         public bool isReceveSucceed { get; set; }
         public byte[] buf;
-        public byte[] dataBuff;
+       // public byte[] dataBuff;
 
         public  StructHelper structHelper = new StructHelper();
 
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine(string.Format("dist={0,5:0.000}", this.dist));
+          //  stringBuilder.AppendLine(string.Format("dist={0,5:0.000}", this.dist));
             return stringBuilder.ToString();
         }
         public string fromHexToString(byte[] hex)

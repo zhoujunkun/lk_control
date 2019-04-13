@@ -17,6 +17,20 @@
         <TextBox HorizontalAlignment="Left" x:Name="textBox_LimitTrig" PreviewKeyDown ="textBox_Enter" Text="{Binding Value, ElementName=sliderDist, Mode=TwoWay}" Height="23" Margin="19.557,74,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="68" BorderBrush="#FF093771"/>
         <Label Content="m" HorizontalAlignment="Left" Margin="96.357,69,0,0" VerticalAlignment="Top" FontSize="18" Width="29" RenderTransformOrigin="0,0.304"/>
         <TextBlock HorizontalAlignment="Left" Text="{Binding Value, ElementName=sliderDist}" Margin="227,50,0,0" TextWrapping="Wrap"  VerticalAlignment="Top"/>
+        <GroupBox Header="升级" HorizontalAlignment="Left" Height="209" Margin="463,5,0,0" VerticalAlignment="Top" Width="322">
+
+            <Grid Margin="0">
+                <Label Content="文件名称:" HorizontalAlignment="Left" Margin="7,6,0,0" VerticalAlignment="Top"/>
+                <Button Content="选择文件" HorizontalAlignment="Left" Height="9.333" Margin="7,75,0,0" VerticalAlignment="Top" Click="openFileUpdataClick" Width="63"/>
+                <TextBlock Name="texbockFileName" HorizontalAlignment="Left" Margin="75,14,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" RenderTransformOrigin="-0.39,-2.045"/>
+                <Label Content="文件大小："  HorizontalAlignment="Left" Margin="7,26,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.076,-0.002"/>
+                <Label Content="版本：" HorizontalAlignment="Left" Margin="8,50,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.076,-0.002"/>
+                <TextBlock Name="textBlockFileSize" HorizontalAlignment="Left" Margin="72,31,0,0" TextWrapping="Wrap"  VerticalAlignment="Top"/>
+                <Button Content="升级" Click="btn_uploadClick" HorizontalAlignment="Left" Margin="112,74,0,0" VerticalAlignment="Top" Width="44"/>
+                <ProgressBar Name="progressUpload" HorizontalAlignment="Left" Height="35" Margin="9,109,0,0" VerticalAlignment="Top" Width="299"/>
+
+            </Grid>
+        </GroupBox>
 
     </Grid>
 </controls:MetroWindow>
