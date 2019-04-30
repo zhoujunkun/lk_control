@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -107,7 +108,10 @@ namespace zLkControl
         }
         string filePath, fileName;
         UInt16 fileSize;
+        byte[] binBuf;  //bin文件存放
+        UInt16 binCrc;  //binCrc校验码
         int packedSize = 1024; //包大小1024
+        VersionApp versionApp;
         private void openFileUpdataClick(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog(); 
@@ -125,16 +129,27 @@ namespace zLkControl
                 int jsonLenghts = jsonLenBuf[0] << 8 | jsonLenBuf[1];
                 byte[] jsonBuf = fileRead.ReadBytes(jsonLenghts);
                 string jsonCfg = Encoding.Default.GetString(jsonBuf);
-                VersionApp versionApp = JsonConvert.DeserializeObject<VersionApp>(jsonCfg);
-                byte[] binBuf = fileRead.ReadBytes(versionApp.Filesize);
+                versionApp = JsonConvert.DeserializeObject<VersionApp>(jsonCfg);
+                binBuf = fileRead.ReadBytes(versionApp.Filesize);
                 crc16Module crc_check = new crc16Module();
-                UInt16 crc = crc_check.crc16(binBuf);
-                if(crc == versionApp.Crc16Modulbus)
+                binCrc = crc_check.crc16(binBuf);
+                fileSize = Convert.ToUInt16(versionApp.Filesize);
+                //Match mc = Regex.Match(versionApp.TimeCreate, @"\d{4}/\d{1,2}/\d{1,2}");
+                //string time = mc.ToString().Replace("/","");
+                textBlockFileSize.Text = versionApp.Filesize.ToString();
+                if (binCrc == versionApp.Crc16Modulbus)
                 {
-                    MessageBox.Show("文件完整，开始升级。。。。")
+                    MessageBoxResult dr = MessageBox.Show("文件校验成功，点击确认升级", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                    if (dr == MessageBoxResult.OK)
+                    {
+                        btn_upload();
+                    }
                 }
-                fileSize = (UInt16)fileStream.Length;
-                textBlockFileSize.Text = fileSize.ToString();
+                else
+                {
+                    MessageBox.Show("文件校验失败。。。");
+                }
+        
                 //此处做你想做的事 ...=ofd.FileName; 
 
             }
@@ -152,17 +167,17 @@ namespace zLkControl
         System.Timers.Timer timerTOA;
         FileStream fileStream;
         int packetCnt = 0;
-        private void btn_uploadClick(object sender, RoutedEventArgs e)
+        private void btn_upload()
         {
             if(serial.check())
             {
 
                 timerTOA = new System.Timers.Timer();
-                timerTOA.Interval = 2000; //100ms超时
+                timerTOA.Interval = 2000; //200ms超时
                 timerTOA.AutoReset = false;
                 timerTOA.Enabled = false;
                 timerTOA.Elapsed += new System.Timers.ElapsedEventHandler(endtime);            
-                packetCnt = (fileStream.Length % packedSize) == 0 ? (int)(fileStream.Length / packedSize) : (int)(fileStream.Length / packedSize) + 1;
+                packetCnt = (fileSize % packedSize) == 0 ? (int)(fileSize / packedSize) : (int)(fileSize / packedSize) + 1;
                 progressUpload.Maximum = packetCnt;
                 sendAck();
                 timerTOA.Start(); //定时器用于超时处理
@@ -185,42 +200,54 @@ namespace zLkControl
         private byte[] packageBegin()
         {
            
-            byte[] firstPackage = new byte[fileName.Length+3];
+            byte[] firstPackage = new byte[versionApp.TimeCreate.Length+5];   //time+size(2)+crc(file 2)
             /*add file name to first package*/
-            for (int i = 0; i < fileName.Length  ; i++)
+            for (int i = 0; i < versionApp.TimeCreate.Length; i++)
             {
-                firstPackage[i]= (byte)fileName.ToCharArray()[i];
+                firstPackage[i]= (byte)versionApp.TimeCreate.ToCharArray()[i];
             }
-            firstPackage[fileName.Length + 1] = (byte)(fileSize >> 8);
-            firstPackage[fileName.Length + 2] = (byte)(fileSize &0xff);
-            sendPakagedFrame(firstPackage, firstPackage.Length, 0);
+            firstPackage[versionApp.TimeCreate.Length + 1] = (byte)(fileSize >> 8);
+            firstPackage[versionApp.TimeCreate.Length + 2] = (byte)(fileSize &0xff);
+            firstPackage[versionApp.TimeCreate.Length + 3] = (byte)(binCrc >> 8);
+            firstPackage[versionApp.TimeCreate.Length + 4] = (byte)(binCrc & 0xff);
+            sendPakagedFrame(firstPackage, 0);
             return firstPackage;
         }
-
+        int packageCnt = 0;
+        int packageCntTrans = 0;
         private bool packageSend()
         {
             /* data: 1024 bytes */
-            byte[] data = new byte[packedSize];
+            byte[] packaedTosend;
             /* send packets with a cycle until we send the last byte */
-            int fileReadCount;
-            /* if this is the last packet fill the remaining bytes with 0 */
-            fileReadCount = fileStream.Read(data, 0, packedSize);
-            if (fileReadCount == 0)
+            int filePackedSize = binBuf.Length - packageCntTrans++ * packedSize;
+            if (packageCntTrans == (packetCnt + 1))
                 return false;
+            if (filePackedSize < packedSize)   //小于packedSize 
+            {
+                packaedTosend = new byte[filePackedSize];
+                Array.Copy(binBuf, packedSize* (packageCntTrans - 1), packaedTosend, 0, filePackedSize);
+            }
+            else
+            {
+                packaedTosend = new byte[packedSize];
+                Array.Copy(binBuf, packedSize* (packageCntTrans - 1), packaedTosend, 0, packedSize);
+            }
+
             /* calculate packetNumber */
-            packetNumber++;
-            sendPakagedFrame(data, fileReadCount, packetNumber);
+            progressBar(packageCntTrans);
+            sendPakagedFrame(packaedTosend,(byte)packageCntTrans);
             return true;
         }
-        byte packetNumber = 0;
-        private void sendPakagedFrame(byte[] buff,int buff_len, byte id)
+
+        private void sendPakagedFrame(byte[] buff, byte id)
         {
             sendDataitem sendFrame = new sendDataitem();
             sendFrame.Type = (byte)(LKSensorCmd.FRAME_TYPE.Upload);
             sendFrame.id = id;
             sendFrame.ifHeadOnly = false;  //含有数据帧
             sendFrame.sendbuf = buff;
-            sendFrame.len =(UInt16)buff_len; //数据帧字节长度
+            sendFrame.len = (UInt16)buff.Length; //数据帧字节长度
             serial.SendMsg(sendFrame);
         }
 
@@ -245,7 +272,7 @@ namespace zLkControl
                         {
                             case Package_enum_.firstPackage:
                                 {
-                                    packetNumber = 0;
+                                    packageCntTrans = 0;
                                     packageBegin();
                                     package_statu = Package_enum_.dataPackaged;
                                 }
@@ -254,6 +281,7 @@ namespace zLkControl
                                 {
                                    if( packageSend() == true)
                                     {
+                                       
                                         timerTOA.Start();
                                     }
                                    else
@@ -272,7 +300,18 @@ namespace zLkControl
                     break;
             }
         }
-
+        //进度条
+        private void progressBar(int count)
+        {
+            Thread thread = new Thread(new ThreadStart(() =>   //多线程
+            {
+               progressUpload.Dispatcher.BeginInvoke((ThreadStart)delegate
+               {
+                        progressUpload.Value = count;
+                });
+            }));
+            thread.Start();
+        }
         public class VersionApp
         {
             public string Name { set; get; }

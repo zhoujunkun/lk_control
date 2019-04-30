@@ -18,84 +18,29 @@
         </Grid.ColumnDefinitions>
         <Border
 			Margin="1"
-			Style="{StaticResource MainBorderStyle}" />
-        <StackPanel
-			Margin="1">
-            <TextBlock
-				Text="Mai che"
-				Margin="0,20,0,8"
-				TextWrapping="Wrap"
-				FontSize="32"
-				TextAlignment="Center"
-				FontFamily="Times New Roman"
-				Foreground="#FF3B3EEA" />
-            <TextBlock
-				Text="zjk"
-				Margin="0,10,0,8"
-				TextWrapping="Wrap"
-				FontSize="12"
-				TextAlignment="Center"
-				FontFamily="Lucida Handwriting" />
-            <Grid
-				Margin="0,10,0,0"
-				Height="80"
-				Width="170">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition
-						Width="80" />
-                    <ColumnDefinition
-						Width="10" />
-                    <ColumnDefinition
-						Width="80" />
-                </Grid.ColumnDefinitions>
-            </Grid>
-            <TextBlock
-				Text="Tel: "
-				Margin="0,16,0,0"
-				TextAlignment="Center"
-				FontSize="12"
-				FontFamily="Times New Roman" />
-            <TextBlock
-				Text="Addr: "
-				Margin="0,16,0,0"
-				FontSize="12"
-				TextAlignment="Center"
-				FontFamily="Times New Roman" />
-        </StackPanel>
+			Style="{StaticResource MainBorderStyle}">
+            <StackPanel>
+                <Grid Height="166" Margin="55,41,70,-15" VerticalAlignment="Top">
+                    <Panel.Background>
+                        <ImageBrush
+					          ImageSource="/Maice.png" />
+                    </Panel.Background>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+
+
         <Border
 			Margin="1"
 			Grid.Column="1"
-			Style="{StaticResource MainBorderStyle}" />
-        <StackPanel
-			Grid.Column="1"
-			Margin="1"
-			Orientation="Vertical">
-            <TextBlock
-				Text="Version"
-				Margin="0,20,0,0"
-				FontSize="32"
-				TextWrapping="Wrap"
-				Foreground="#FF3B3EEA"
-				TextAlignment="Center"
-				HorizontalAlignment="Stretch"
-				VerticalAlignment="Top"
-				FontFamily="Times New Roman" />
-            <TextBlock
-				Margin="40,16,0,0"
-				TextAlignment="Left"
-				HorizontalAlignment="Stretch"
-				VerticalAlignment="Top" ><Run Text="Version:  V"/><Run Text="0"/><Run Text=".1."/><Run Text="1"/></TextBlock>
-            <TextBlock
-				Margin="40,16,0,0"
-				TextAlignment="Left"
-				HorizontalAlignment="Stretch"
-				VerticalAlignment="Top" ><Run Text="Date: "/><Run Text="2019"/><Run Text=".2.11"/></TextBlock>
-            <TextBlock
-				Text="Details: - Automatically clear DDD area"
-				Margin="40,16,0,0"
-				TextAlignment="Left"
-				HorizontalAlignment="Stretch"
-				VerticalAlignment="Top" />
-        </StackPanel>
+			Style="{StaticResource MainBorderStyle}" >
+            <StackPanel>
+                <TextBlock Height="34" TextAlignment="Center"  Margin="0,19,0,0" TextWrapping="Wrap" Text="迈测激光测距" FontSize="20" Foreground="#FF3B3EEA" VerticalAlignment="Center" HorizontalAlignment="Center" Width="293"/>
+                <TextBlock Height="37.333" TextAlignment="Center"  Margin="0,30,0,0" TextWrapping="Wrap" HorizontalAlignment="Center" Width="293" VerticalAlignment="Center"><Run Text="公司网站：http://www.mileseey.com "/><LineBreak/><Run Text=" http://www.mileseey.net"/></TextBlock>
+                <TextBlock Height="17.333" TextAlignment="Center"  Margin="0,10,0,0" TextWrapping="Wrap" HorizontalAlignment="Center" Width="293" VerticalAlignment="Center"><Run Text="全国免费客服电话：4000-801-9055 "/></TextBlock>
+                <TextBlock Height="32" TextAlignment="Center"  Margin="0,10,0,0" TextWrapping="Wrap" HorizontalAlignment="Center" Width="293" VerticalAlignment="Center" Text="公司总部地址：深圳市南山区留仙大道塘朗城广场西区5号楼36F"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </controls:MetroWindow>

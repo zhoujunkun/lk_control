@@ -26,7 +26,6 @@
                 <Label Content="文件大小："  HorizontalAlignment="Left" Margin="7,26,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.076,-0.002"/>
                 <Label Content="版本：" HorizontalAlignment="Left" Margin="8,50,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.076,-0.002"/>
                 <TextBlock Name="textBlockFileSize" HorizontalAlignment="Left" Margin="72,31,0,0" TextWrapping="Wrap"  VerticalAlignment="Top"/>
-                <Button Content="升级" Click="btn_uploadClick" HorizontalAlignment="Left" Margin="112,74,0,0" VerticalAlignment="Top" Width="44"/>
                 <ProgressBar Name="progressUpload" HorizontalAlignment="Left" Height="35" Margin="9,109,0,0" VerticalAlignment="Top" Width="299"/>
 
             </Grid>

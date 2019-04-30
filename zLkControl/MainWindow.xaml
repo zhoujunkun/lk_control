@@ -202,17 +202,10 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <StackPanel>
-                        <iconPacks:PackIconMaterial Kind="ArrowCollapseDown" RenderTransformOrigin="5.083,8.823" Height="50" Width="72" />
-                        <iconPacks:PackIconMaterialLight Kind="Heart" Height="63" Width="90" />
-                        <iconPacks:PackIconFontAwesome Kind="FontAwesomeBrands" />
-                        <iconPacks:PackIconOcticons Kind="MarkGithub" Height="58" Width="77" />
-                        <iconPacks:PackIconModern Kind="ThumbsUp" />
-                        <iconPacks:PackIconEntypo Kind="EmojiHappy" Height="112" Width="158" />
-                        <iconPacks:PackIconSimpleIcons Kind="StackOverflow" />
-                    </StackPanel>
+
                 </Grid>
             </TabItem>
+            <DataGrid Height="100" Width="100"/>
         </TabControl>
         <Canvas Height="39" VerticalAlignment="Top" HorizontalAlignment="Right" Width="663" Margin="0,1,0,0">
             <Button x:Name="BtnConnect" Content="Connect" Height="19" Canvas.Left="384" Canvas.Top="10" Width="116" Click="Btn_Click_Connect"  HorizontalAlignment="Left"/>

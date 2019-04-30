@@ -135,6 +135,7 @@
     <Compile Include="Setting.xaml.cs">
       <DependentUpon>Setting.xaml</DependentUpon>
     </Compile>
+    <Compile Include="sqlite\z_sqlite.cs" />
     <Compile Include="tf\ErrorLog.cs" />
     <Compile Include="tf\SensorDataAcquirer.cs">
       <SubType>Code</SubType>
@@ -217,6 +218,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Maice.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
