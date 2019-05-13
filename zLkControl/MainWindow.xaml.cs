@@ -20,6 +20,7 @@ namespace zLkControl
 
     using LiveCharts;
     using LiveCharts.Configurations;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -39,7 +40,8 @@ namespace zLkControl
         public Func<double, string> DateTimeFormatter { get; set; }
         public double AxisStep { get; set; }
         public double AxisUnit { get; set; }
-
+        //正则匹配
+        Regex reg = new Regex(@"COM[0-9]*");  //正则表达式提取COM
         //tf
         float dist;  //距离值
         private info infoWin;
@@ -97,7 +99,6 @@ namespace zLkControl
             AxisMax = 20;
             AxisMin = 1;
             IsReading = false;
-
             YFormatter = val => val.ToString("N") + " 米";
             DataContext = this;
 
@@ -343,12 +344,13 @@ namespace zLkControl
                 //Value = 160;
                 //
                 mainDataAcquirer.SensorDataChangedEvent = (SensorDataAcquirer.SensorDataChangedHandler)Delegate.Combine(mainDataAcquirer.SensorDataChangedEvent, new SensorDataAcquirer.SensorDataChangedHandler(this.MainDataAcquirer_SensorDataChangedEvent));
-              
                 this.timerEftPtsCounter = new System.Timers.Timer();
                 this.timerEftPtsCounter.Interval = 1000;
                 this.timerEftPtsCounter.Elapsed += TimerEftPtsCounter_Elapsed1;
                 this.timerEftPtsCounter.Enabled = true;
                 (PresentationSource.FromVisual(this) as HwndSource).AddHook(new HwndSourceHook(this.HwndProc));
+                //com list
+                GetComList(SerPort);
             }
             catch (Exception ex)
             {
@@ -409,9 +411,11 @@ namespace zLkControl
             }
             return hexStr;
         }
-        /*
-         显示数据
-         */
+/// <summary>
+/// 显示数据
+/// </summary>
+/// <param name="data"></param>
+/// <param name="sensor"></param>
         private void ShowData(byte[]data, SensorDataItem sensor)
         {
             if (sensor == null) //txbox显示
@@ -490,7 +494,7 @@ namespace zLkControl
 
         private void SerPortPmd(object sender, MouseButtonEventArgs e)
         {
-            this.GetComList(SerPort);
+           // this.GetComList(SerPort);
         }
         private void SerPortSelC(object sender, SelectionChangedEventArgs e)
         {
@@ -506,19 +510,8 @@ namespace zLkControl
         /*获取串口端口号*/
         private void GetComList(ComboBox s)
         {
-           // RegistryKey keyCom = Registry.LocalMachine.OpenSubKey("Hardware\\DeviceMap\\SerialComm");
-            //if (keyCom != null)
-            //{
-            //    string[] valueNames = keyCom.GetValueNames();
-            //    s.Items.Clear();
-            //    foreach (string sName in valueNames)
-            //    {
-            //        string sValue = (string)keyCom.GetValue(sName);
-            //        s.Items.Add(sValue);
-            //    }
-            //} 
             //通过WMI获取COM端口
-            string[] ss = MulGetHardwareInfo(HardwareEnum_T.Win32_PnPEntity, "Name");
+            string[] ss = GetSerialPortArray();
             s.Items.Clear();
             foreach (string sName in ss)
             {
@@ -556,7 +549,8 @@ namespace zLkControl
                 return;
             }
             int barate = int.Parse((string)BarudRate.SelectedItem);
-            Lk_Serial.IniteSerial(strPort, barate);
+            string com = reg.Match(strPort).Value;
+            Lk_Serial.IniteSerial(com, barate);
             Lk_Serial.Start();
             if(Lk_Serial.check())
             {
@@ -602,40 +596,8 @@ namespace zLkControl
             {
                 if (msg == 537)
                 {
-                    //RegistryKey keyCom = Registry.LocalMachine.OpenSubKey("Hardware\\DeviceMap\\SerialComm");
-                    //string[] portnames = keyCom.GetValueNames();
-                    //this.SerPort.Items.Clear();
-                    //foreach (string x in portnames)
-                    //{
-                    //    string sValue = (string)keyCom.GetValue(x);
-                    //    this.SerPort.Items.Add(sValue);
-                    //}
-
-                    //if (this.flagSP)
-                    //{
-                    //    int index = 0;
-                    //    bool flag = true;
-                    //    foreach (string x2 in portnames)
-                    //    {
-                    //        if (this.Lk_Serial.GetPort() == (string)keyCom.GetValue(x2))
-                    //        {
-                    //            flag = false;
-                    //            this.SerPort.SelectedIndex = index;
-                    //        }
-                    //        index++;
-                    //    }
-                    //    if (flag)
-                    //    {
-                    //        this.Lk_Serial.Close();
-                    //        base.Dispatcher.BeginInvoke(new Action(delegate ()
-                    //        {
-                    //            this.flagSP = false;
-                    //            this.BtnConnect.Content = "Connect";
-                    //        }), new object[0]);
-                    //        MessageBox.Show("Serial port has been removed. Please check!");
-                    //    }
-                    //}
-                   
+                  
+                    GetComList(SerPort);
                 }
             }
             catch
@@ -674,29 +636,6 @@ namespace zLkControl
                 ErrorLog.WriteLog(ex, "");
             }
         }
-        //#region 测速
-        ////开始测速
-        //public void Btn_Clicked_SpeedStart(object sender, RoutedEventArgs e)
-        //{
-        //    send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.SPEED_CTL);
-        //    send_msg.id = (byte)(LKSensorCmd.FRAME_SpeeCtlID.START);
-        //    send_msg.ifHeadOnly = true;
-        //    Lk_Serial.SendMsg(send_msg);
-        //    ShowData(send_msg.sendFrame, null);
-        //}
-        ////停止测速
-        //public void Btn_Clicked_SpeedStop(object sender, RoutedEventArgs e)
-        //{
-        //    send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.SPEED_CTL);
-        //    send_msg.id = (byte)(LKSensorCmd.FRAME_SpeeCtlID.STOP);
-        //    send_msg.ifHeadOnly = true;
-        //    Lk_Serial.SendMsg(send_msg);
-        //    ShowData(send_msg.sendFrame, null);
-        //}
-
-
-        //#endregion
-
 
 
         #region 命令按钮
@@ -1163,6 +1102,7 @@ namespace zLkControl
             settingWin.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             settingWin.ShowDialog();
         }
+        #region 动态获取串口
         /// <summary>
         /// 枚举win32 api
         /// </summary>
@@ -1258,9 +1198,61 @@ namespace zLkControl
             //finally
             //{ strs = null; }
         }
-       
-    }
 
+        /// <summary>
+        /// 获取串口列表
+        /// </summary>
+        /// <returns></returns>
+        private static string[] GetSerialPortList()
+        {
+            return MulGetHardwareInfo(HardwareEnum_T.Win32_PnPEntity, "Name");
+        }
+        /// <summary>
+        /// 获取串口列表线程
+        /// </summary>
+        private void OnGetSerialPortList()
+        {
+
+            try
+            {
+                PortNameArray = GetSerialPortList();
+            }
+            catch (Exception exp)
+            {
+                System.Diagnostics.Debug.WriteLine(exp.Message);
+            }
+            ReadOver = true;
+        }
+        string[] PortNameArray;
+        bool ReadOver;
+        public Thread threadReadValue { get; private set; }
+        /// <summary>
+        /// 通过线程获取串口列表
+        /// </summary>
+        public string[] GetSerialPortArray()
+        {
+            PortNameArray = null;
+            try
+            {
+                threadReadValue = new System.Threading.Thread(OnGetSerialPortList);
+                threadReadValue.IsBackground = true;
+                ReadOver = false;
+                threadReadValue.Start();
+
+                while (ReadOver == false)
+                {
+                    System.Threading.Thread.Sleep(200);
+                }
+                threadReadValue = null;
+            }
+            catch (Exception exp)
+            {
+                System.Diagnostics.Debug.WriteLine(exp.Message);
+            }
+            return PortNameArray;
+        }
+    }
+    #endregion
     class NotifyBase 
     {
 

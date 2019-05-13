@@ -207,14 +207,14 @@
             </TabItem>
             <DataGrid Height="100" Width="100"/>
         </TabControl>
-        <Canvas Height="39" VerticalAlignment="Top" HorizontalAlignment="Right" Width="663" Margin="0,1,0,0">
-            <Button x:Name="BtnConnect" Content="Connect" Height="19" Canvas.Left="384" Canvas.Top="10" Width="116" Click="Btn_Click_Connect"  HorizontalAlignment="Left"/>
-            <ComboBox x:Name="SerPort" PreviewMouseDown="SerPortPmd" SelectionChanged="SerPortSelC" Height="19" Canvas.Left="272" Canvas.Top="10" Width="85"   />
+        <Canvas Height="39" VerticalAlignment="Top" HorizontalAlignment="Right" Width="738" Margin="0,1,0,0">
+            <Button x:Name="BtnConnect" Content="Connect" Height="19" Canvas.Left="443" Canvas.Top="10" Width="116" Click="Btn_Click_Connect"  HorizontalAlignment="Left"/>
+            <ComboBox x:Name="SerPort" PreviewMouseDown="SerPortPmd" SelectionChanged="SerPortSelC" Height="19" Canvas.Left="272" Canvas.Top="10" Width="148"   />
             <ComboBox x:Name="BarudRate" Height="7" Canvas.Left="86" Canvas.Top="10" Width="86"/>
             <Label Content="Serial Port:" Height="25" Canvas.Left="200" Canvas.Top="10" Width="72"/>
             <Label Content="Baud Rate:" Height="25" Canvas.Left="14" Canvas.Top="10" Width="72"/>
-            <Label Content="Product:" Canvas.Left="524" Canvas.Top="10"/>
-            <Label Content="" x:Name="labelProduct" Height="25" Canvas.Left="587" Canvas.Top="10" Width="53" Background="White" FontWeight="Bold"/>
+            <Label Content="Product:" Canvas.Left="583" Canvas.Top="10"/>
+            <Label Content="" x:Name="labelProduct" Height="25" Canvas.Left="646" Canvas.Top="10" Width="53" Background="White" FontWeight="Bold"/>
 
         </Canvas>
     </Grid>
