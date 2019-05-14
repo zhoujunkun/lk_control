@@ -97,12 +97,15 @@
                                         <Button Content="S"  Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" HorizontalAlignment="Left" Margin="240,79,0,6" Width="28" FontSize="10" Foreground="#FF5399B9"/>
                                     </Grid>
                                 </TabItem>
-                                <TabItem Header="测速" FontSize="11">
+                                <TabItem Header="QC" FontSize="11">
                                     <Grid Background="#FFE5E5E5" Margin="-3,0,3,0">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="501"/>
                                         </Grid.RowDefinitions>
-
+                                        <Button Content="开始标定" Click="Btn_Clicked_Stand" HorizontalAlignment="Left" Margin="17,81,0,0" VerticalAlignment="Top" Width="75"/>
+                                        <Label Content="黑板标定距离(m)：" HorizontalAlignment="Left" Margin="5,11,0,0" VerticalAlignment="Top" FontSize="18"/>
+                                        <Slider  HorizontalAlignment="Left" ValueChanged="slider_value_change" TickFrequency="10"  Maximum="100" IsSnapToTickEnabled="True" Name="stand_slider" Margin="12,56,0,0" VerticalAlignment="Top" Height="16" Width="220"/>
+                                        <TextBlock HorizontalAlignment="Left" Text="{Binding Value, ElementName=stand_slider}" Margin="175,17,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" FontSize="20" Width="54" RenderTransformOrigin="-1.382,0.702" Foreground="#FF298BF2"/>
                                     </Grid>
                                 </TabItem>
                             </TabControl>

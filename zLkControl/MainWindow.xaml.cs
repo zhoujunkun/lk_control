@@ -699,6 +699,25 @@ namespace zLkControl
             ShowData(send_msg.sendFrame, null);
 
         }
+
+        private void Btn_Clicked_Stand(object sender, RoutedEventArgs e)
+        {
+            if (Lk_Serial.check())
+            {
+                send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.QC);
+                send_msg.id = (byte)(LKSensorCmd.FRAME_QCcmdID.stand_start);
+                send_msg.ifHeadOnly = false;  //含标定数据
+                send_msg.sendbuf = BitConverter.GetBytes(LKSensorCmd.stand_distance);    //数据帧缓存
+                send_msg.len = LKSensorCmd.parmStandDistByteSize; //数据帧字节长度
+                Lk_Serial.SendMsg(send_msg);
+                ShowData(send_msg.sendFrame, null);
+            }
+            else
+            {
+                MessageBox.Show("Serial port has not connected. Please check!");
+            }
+        }
+
         private void ShowOrHideComponentsConti(bool v)
         {
             sendTextBox.IsEnabled = v;
@@ -1251,6 +1270,17 @@ namespace zLkControl
             }
             return PortNameArray;
         }
+
+        /// <summary>
+        /// 标定值改变事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void slider_value_change(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            LKSensorCmd.stand_distance =(byte) stand_slider.Value;
+        }
+
     }
     #endregion
     class NotifyBase 
