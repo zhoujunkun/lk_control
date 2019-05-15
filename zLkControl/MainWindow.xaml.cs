@@ -266,7 +266,8 @@ namespace zLkControl
                     AxisMin = data_counts - 20;
                 }
                 // lets only use the last 150 values
-                if (ChartValues.Count > 150) ChartValues.RemoveAt(0);
+                if (ChartValues.Count > 150)
+                    ChartValues.RemoveAt(0);
                 ChartValues.Add(new MeasureModel
                 {
                     DateTime = data_counts,
@@ -1281,6 +1282,14 @@ namespace zLkControl
             LKSensorCmd.stand_distance =(byte) stand_slider.Value;
         }
 
+        private void main_windowClose(object sender, EventArgs e)
+        {
+            if(Lk_Serial.check())
+            {
+                Lk_Serial.Close();
+
+            }
+        }
     }
     #endregion
     class NotifyBase 

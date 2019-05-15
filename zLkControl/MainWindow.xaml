@@ -10,6 +10,7 @@
         xmlns:local="clr-namespace:zLkControl"
         xmlns:controlzex="urn:controlzex" x:Class="zLkControl.MainWindow"
         mc:Ignorable="d"
+         Closed="main_windowClose"
         WindowStartupLocation="CenterScreen"
         Title="@zjk" Height="620" Width="1180">
     <Controls:MetroWindow.RightWindowCommands>

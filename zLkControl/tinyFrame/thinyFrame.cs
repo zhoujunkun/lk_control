@@ -141,6 +141,7 @@ namespace zLkControl
                                 else
                                 {
                                     state = "data";
+                                    partlen = 0;
                                 }
                             }
                             else
@@ -189,6 +190,7 @@ namespace zLkControl
                         }
                     }break;
             }
+            
         }
         //添加回调函数
         public void handleReceived(SensorDataItem lkSensor )
