@@ -1,5 +1,4 @@
 ﻿using MahApps.Metro.Controls;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,21 +6,18 @@ using System.Globalization;
 using System.IO.Ports;
 using System.Management;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using Microsoft.Research.DynamicDataDisplay;
+using Microsoft.Research.DynamicDataDisplay.DataSources;
 using System.Windows.Media;
 [assembly: SuppressIldasm()]
 namespace zLkControl
 {
-
-    using LiveCharts;
-    using LiveCharts.Configurations;
     using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
@@ -30,16 +26,6 @@ namespace zLkControl
     public partial class MainWindow : MetroWindow, INotifyPropertyChanged
     {
 
-        /*新画图测试*/
-        private double _axisMax;
-        private double _axisMin;
-        private double _aYisMax;
-        private double _aYisMin;
-        private double _trend;
-        public ChartValues<MeasureModel> ChartValues { get; set; }
-        public Func<double, string> DateTimeFormatter { get; set; }
-        public double AxisStep { get; set; }
-        public double AxisUnit { get; set; }
         //正则匹配
         Regex reg = new Regex(@"COM[0-9]*");  //正则表达式提取COM
         //tf
@@ -52,11 +38,8 @@ namespace zLkControl
         private System.Timers.Timer timerEftPtsCounter;
         private int eftPtsPerSec;
         private bool flagSP;
-        private long PointNum;
-
         private string strPort = string.Empty;   //端口号
         int txCunt;  //发送计数
- 
         public String[] Product = { "lk02", "lk03" };
         //serial
         SerialPort zjkPort;
@@ -64,145 +47,15 @@ namespace zLkControl
         private string receiveData;
         public bool isConnected = false;
         int count_texbox; //显示帧数
-
         //cmd
         public sendDataitem send_msg = new sendDataitem();
         //lk
-
-       // public static lk_param lk_Param_ = new lk_param();           //lk 传感器参数
-       
-        //struct
-        //public param_ lk_parm = new param_();
-        //[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
-        //public struct param_
-        //{
-        //    public byte product;        //产品号
-        //    public UInt32 baud_rate;    //波特率
-        //    public UInt16 limit_dist;  //门限距离
-        //    public byte isLedOn;        //激光是否打开, 打开：1 ;关闭：0
-        //    public byte isBase;        //是否是后基准  前基准： 1 ；后基准：0
-        //    public byte ifHasConfig;    //是否传感器已经配置完成
-        //};
-
         public MainWindow()
         {
             InitializeComponent();
             base.Loaded += new RoutedEventHandler(this.Window_Loaded);
-            ////画图测试
-            var mapper = Mappers.Xy<MeasureModel>()
-            .X(model => model.DateTime)   //use DateTime.Ticks as X
-            .Y(model => model.Value);           //use the value property as Y                                 //lets save the mapper globally.
-            Charting.For<MeasureModel>(mapper);
-            //the values property will store our values array
-            ChartValues = new ChartValues<MeasureModel>();
-            chartDisplay.AnimationsSpeed = TimeSpan.FromMilliseconds(5);
-            AxisMax = 20;
-            AxisMin = 1;
-            IsReading = false;
-            YFormatter = val => val.ToString("N") + " 米";
-            DataContext = this;
-
         }
-        #region   新绘图测试
-        public Func<double, string> YFormatter { get; set; }
-        
-        public double YixMax
-        {
-            get { return _aYisMax; }
-            set
-            {
-                _aYisMax = value;
-                OnPropertyChange("YixMax");
-
-            }
-        }
-
-        public double YixMin
-        {
-            get { return _aYisMin; }
-            set
-            {
-                _aYisMin = value;
-                OnPropertyChange("YixMin");
-
-            }
-        }
-
-        public double AxisMax
-        {
-            get { return _axisMax; }
-            set
-            {
-                _axisMax = value;
-                OnPropertyChange("AxisMax");
-                
-            }
-        }
-        public double AxisMin
-        {
-            get { return _axisMin; }
-            set
-            {
-                _axisMin = value;
-               OnPropertyChange("AxisMin");
-            }
-        }
-        private double chartLimitValue;
-        public double ChartLimitValue
-        {
-            get { return chartLimitValue; }
-            set
-            {
-                chartLimitValue = value;
-                OnPropertyChange("ChartLimitValue");
-            }
-        }
-        public bool IsReading { get; set; }
-        public  int time_count;
-        private void Read()
-        {
-            var r = new Random();
-
-            while (IsReading)
-            {
-                Thread.Sleep(50);
-                SetAxisLimits();
-                _trend = r.Next(40, 50);
-                time_count++;
-               
-                ChartValues.Add(new MeasureModel
-                {
-                    DateTime = time_count,
-                    Value = _trend
-                });
-
-                
-
-               // lets only use the last 150 values
-                if (ChartValues.Count > 150) ChartValues.RemoveAt(0);
-            }
-        }
-
-        private void SetAxisLimits()
-        {
-            //AxisMax = now.Ticks + TimeSpan.FromSeconds(1).Ticks; // lets force the axis to be 1 second ahead
-            //AxisMin = now.Ticks - TimeSpan.FromSeconds(8).Ticks; // and 8 seconds behind
-            if(time_count>20)
-            {
-                AxisMax = time_count + 1;
-                AxisMin = time_count - 20;
-            }
-        }
-
-        private void InjectStopOnClick(object sender, RoutedEventArgs e)
-        {
-            IsReading = !IsReading;
-            if (IsReading) Task.Factory.StartNew(Read);
-
-        }
-
-
-        #endregion
+    
         //lk general listenr
         void genralFunc( SensorDataItem sensor)
         {
@@ -246,38 +99,27 @@ namespace zLkControl
 
         }
        
-      
-
-        //lk type listenr
+     
         const int LK03_DISPLAY_TYPE = (int)(LKSensorCmd.FRAME_TYPE.DataGet);
         const int LK03_PARM_TYPE = (int) (LKSensorCmd.FRAME_TYPE.ParamGet);
         int data_counts;
+        /// <summary>
+        /// lk type listenr
+        /// </summary>
+        /// <param name="sensor"></param>
         void typefunc( SensorDataItem sensor)
         {
             byte[] lkData = sensor.buf;
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
-                ShowData(sensor.buf, sensor);
-                dist = sensor.buf[1] << 8 | sensor.buf[0];
-                data_counts++;
-                if (data_counts > 20)
-                {
-                    AxisMax = data_counts + 1;
-                    AxisMin = data_counts - 20;
-                }
-                // lets only use the last 150 values
-                if (ChartValues.Count > 150)
-                    ChartValues.RemoveAt(0);
-                ChartValues.Add(new MeasureModel
-                {
-                    DateTime = data_counts,
-                    Value = dist / 100,
-                });
-                DistTextBlock.Text = dist.ToString();
+       
             }), new object[0]);
         }
 
-
+        /// <summary>
+        /// 开机参数显示
+        /// </summary>
+        /// <param name="sensor"></param>
         void ParmaRevFunc(SensorDataItem sensor)
         {
             byte[] lkData = sensor.buf;
@@ -337,7 +179,6 @@ namespace zLkControl
                 BarudRate.Text = "115200";
                 SensorDataAcquirer mainDataAcquirer = this.Lk_Serial;
                 //add id listen
-                //  mainDataAcquirer.lkFrame.addIDlistener(LK03_DISPLAY_ID, idfunc);
                 mainDataAcquirer.lkFrame.addTYPElistener(LK03_DISPLAY_TYPE, typefunc);
                 mainDataAcquirer.lkFrame.addTYPElistener(LK03_PARM_TYPE, ParmaRevFunc);
                 mainDataAcquirer.lkFrame.addGenralListener(genralFunc);
@@ -507,8 +348,10 @@ namespace zLkControl
             {
             }
         }
-        
-        /*获取串口端口号*/
+        /// <summary>
+        /// 获取串口端口号
+        /// </summary>
+        /// <param name="s"></param>
         private void GetComList(ComboBox s)
         {
             //通过WMI获取COM端口
@@ -522,7 +365,11 @@ namespace zLkControl
 
 
         }
-        //串口连接
+        /// <summary>
+        /// 串口连接
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Btn_Click_Connect(object sender, RoutedEventArgs e)
         {
             if(flagSP)
