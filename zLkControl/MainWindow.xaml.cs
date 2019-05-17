@@ -14,6 +14,7 @@ using System.Windows.Interop;
 using Microsoft.Research.DynamicDataDisplay;
 using Microsoft.Research.DynamicDataDisplay.DataSources;
 using System.Windows.Media;
+using zLkControl.Dynamicdisplay;
 [assembly: SuppressIldasm()]
 namespace zLkControl
 {
@@ -25,7 +26,9 @@ namespace zLkControl
     /// 
     public partial class MainWindow : MetroWindow, INotifyPropertyChanged
     {
-
+        private dyDisplay dd = new dyDisplay();
+        private dyDisplay sighal_dd = new dyDisplay();
+        private LineGraph chart;
         //正则匹配
         Regex reg = new Regex(@"COM[0-9]*");  //正则表达式提取COM
         //tf
@@ -110,9 +113,19 @@ namespace zLkControl
         void typefunc( SensorDataItem sensor)
         {
             byte[] lkData = sensor.buf;
+            eftPtsPerSec++;
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
-       
+                UInt16 dist =(UInt16)( lkData[1] << 8 | lkData[0]);
+                this.ddCounter++;
+                int xax = ddCounter - 100;
+                if (xax <= 0)
+                {
+                    xax = 0;
+                }
+                // plotterTimeLine.Viewport.Visible = new System.Windows.Rect(xax, 0, 50, data.dist+1000);
+                //  plotterTimeLine.Viewport.Width = (xax);
+                this.dd.Add(new Points((uint)this.ddCounter, dist));
             }), new object[0]);
         }
 
@@ -185,7 +198,22 @@ namespace zLkControl
                 //plot
                 //Value = 160;
                 //
-                mainDataAcquirer.SensorDataChangedEvent = (SensorDataAcquirer.SensorDataChangedHandler)Delegate.Combine(mainDataAcquirer.SensorDataChangedEvent, new SensorDataAcquirer.SensorDataChangedHandler(this.MainDataAcquirer_SensorDataChangedEvent));
+                mainDataAcquirer.SensorDataChangedEvent = SensorDataChangedHandle;
+                //显示
+                EnumerableDataSource<Points> ds = new EnumerableDataSource<Points>(this.dd);
+                ds.SetXMapping((Points x) => x.Counter);
+                ds.SetYMapping((Points y) => y.Value);
+                this.chart = plotterTimeLine.AddLineGraph(ds, Colors.Blue, 2.0,"距离");
+                
+
+                EnumerableDataSource<Points> dsighal = new EnumerableDataSource<Points>(this.sighal_dd);
+                dsighal.SetXMapping((Points x) => x.Counter);
+                dsighal.SetYMapping((Points y) => y.Value);
+                this.chart = plotterTimeLine.AddLineGraph(dsighal, Colors.Red, 2.0,"峰值电压");
+               
+                this.plotterTimeLine.LegendVisible = true;
+                //  plotterTimeLine.Viewport.FitToView();
+                //plotterTimeLine.Children.Remove(plotterTimeLine.MouseNavigation); //取消鼠标拖动及缩放绘图仪
                 this.timerEftPtsCounter = new System.Timers.Timer();
                 this.timerEftPtsCounter.Interval = 1000;
                 this.timerEftPtsCounter.Elapsed += TimerEftPtsCounter_Elapsed1;
@@ -202,7 +230,12 @@ namespace zLkControl
                 Application.Current.Shutdown(-1);
             }
         }
-        //发送textbox
+
+        /// <summary>
+        /// textbox 发送窗口
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Btn_Click_Cmd(object sender, RoutedEventArgs e)
         {
             strToSend = sendTextBox.Text;
@@ -454,20 +487,32 @@ namespace zLkControl
             return IntPtr.Zero;
         }
         private int ddCounter;
-        private void MainDataAcquirer_SensorDataChangedEvent(SensorDataItem data, long counter)
+        private void SensorDataChangedHandle(byte[]buff)
         {
-            eftPtsPerSec++;
 
-            if (data.isReceveSucceed) //是否已经接收完成
-            {
-               
-            }
-        
-
-            base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
-            {
-
-            }), new object[0]);
+                        eftPtsPerSec++;
+                        UInt16 signal_vol = (UInt16)(buff[1] << 8 | buff[2]);
+                        UInt16 dist = (UInt16)(buff[3] << 8 | buff[4]);
+                        UInt16 ad603_agc = (UInt16)(buff[5] << 8 | buff[6]);
+                        base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
+                        {
+                            this.ddCounter++;
+                            int xax = ddCounter - 100;
+                            if (xax <= 0)
+                            {
+                                xax = 0;
+                            }
+                            // plotterTimeLine.Viewport.Visible = new System.Windows.Rect(xax, 0, 50, data.dist+1000);
+                            //  plotterTimeLine.Viewport.Width = (xax);
+                            this.dd.Add(new Points((uint)this.ddCounter, dist));
+                            this.sighal_dd.Add(new Points((uint)this.ddCounter, signal_vol));
+                        }), new object[0]);
+                   
+                
+            
+           
+           
+         
 
         }
 
@@ -569,14 +614,15 @@ namespace zLkControl
         private void ShowOrHideComponentsConti(bool v)
         {
             sendTextBox.IsEnabled = v;
-            SerPort.IsEnabled = !v;
-            BarudRate.IsEnabled = !v;
+            SerPort.IsEnabled = v;
+            BarudRate.IsEnabled = v;
             checkBox_red.IsEnabled = v;
             RadioBtn_Front.IsEnabled = v;
             RadioBtn_Base.IsEnabled = v;
             Btn_Get_Parm.IsEnabled = v;
             Btn_Once.IsEnabled = v;
             checkBox_Atuo_Che.IsEnabled = v;
+            BtnConnect.IsEnabled = v;
         }
 
         //前基准
@@ -1158,7 +1204,7 @@ namespace zLkControl
     public class MeasureModel
     {
         public int DateTime { get; set; }
-        public double Value { get; set; }
+        public UInt16 Value { get; set; }
     }
 
 }

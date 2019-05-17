@@ -25,7 +25,7 @@
             Click="Btn_Clicked_Setting"   />
         </Controls:WindowCommands>
     </Controls:MetroWindow.LeftWindowCommands>
-    <Grid x:Name="grid">
+    <Grid x:Name="grid" Background="#FFE5E5E5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
@@ -42,7 +42,7 @@
             <Label Content="" x:Name="labelProduct" Height="25" Canvas.Left="646" Canvas.Top="10" Width="53" Background="White" FontWeight="Bold"/>
 
         </Canvas>
-        <TabControl TabStripPlacement="Left"  Margin="0,40,0,0" Background="#FFE5E5E5">
+        <TabControl TabStripPlacement="Left"  Margin="0,40,0,0" Background="#FFE5E5E5" BorderBrush="#FF89A6BF">
             <TabItem Header="显示">
                 <Grid Background="#FFE5E5E5" Margin="0">
                     <Grid.ColumnDefinitions>
@@ -50,12 +50,12 @@
                         <ColumnDefinition Width="820*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="238*"/>
-                        <RowDefinition Height="183*"/>
+                        <RowDefinition Height="Auto" MinHeight="155"/>
+                        <RowDefinition Height="163*"/>
+                        <RowDefinition Height="227*"/>
                     </Grid.RowDefinitions>
-                    <Button  Content="单次" x:Name="Btn_Once" IsEnabled="False" Click="Btn_Once_Cmd" HorizontalAlignment="Left" Margin="32.667,0,0,182" Width="210" BorderBrush="#FF647878" FontSize="20" Background="{x:Null}" Foreground="#FFA46161" Height="60" VerticalAlignment="Bottom" Grid.Row="1"/>
-                    <Button Content="连续" x:Name="Btn_Continue" IsEnabled="False" Click="Btn_Contitue_Cmd" Margin="32.667,0,0,55" BorderBrush="Black" Height="60" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="210" FontSize="20" Grid.Row="1">
+                    <Button  Content="单次" x:Name="Btn_Once" IsEnabled="False" Click="Btn_Once_Cmd" HorizontalAlignment="Left" Margin="35,0,0,23.667" Width="210" BorderBrush="#FF647878" FontSize="20" Background="{x:Null}" Foreground="#FFA46161" Height="60" VerticalAlignment="Bottom"/>
+                    <Button Content="连续" x:Name="Btn_Continue" IsEnabled="False" Click="Btn_Contitue_Cmd" Margin="32,56.333,0,0" BorderBrush="Black" Height="60" VerticalAlignment="Top" HorizontalAlignment="Left" Width="210" FontSize="20" Grid.Row="1">
                         <Button.BitmapEffect>
                             <BevelBitmapEffect x:Name="testBe"
                                                                    BevelWidth="20"
@@ -65,24 +65,27 @@
                                                                    Smoothness="0.5"/>
                         </Button.BitmapEffect>
                     </Button>
-                    <Grid Grid.Column="1" Margin="0" Grid.RowSpan="3">
-                        <d3:ChartPlotter x:Name="plotterTimeLine" Margin="0">
-                            <d3:CursorCoordinateGraph  AutoHide="False"  LineStroke="Aqua" />
-                            <d3:VerticalAxisTitle x:Name="axisTitle" Content="距离(cm)"/>
-                            <d3:HorizontalAxisTitle Content="时间"/>
-                            <d3:AxisCursorGraph ShowHorizontalLine="True" />
-                            <d3:LineGraph Name="lineGraph" Stroke="OrangeRed" StrokeThickness="1"/>
-
-                        </d3:ChartPlotter>
+                    <Grid Margin="279,0,0,-0.333" Grid.RowSpan="3" Grid.ColumnSpan="2">
+                        <GroupBox Header="GroupBox" Margin="0">
+                            <d3:ChartPlotter x:Name="plotterTimeLine" Margin="0">
+                                <d3:CursorCoordinateGraph   AutoHide="False"  LineStroke="Aqua" />
+                                <d3:VerticalAxisTitle x:Name="axisTitle" Content="距离(cm)"/>
+                                <d3:HorizontalAxisTitle Content="时间"/>
+                                <d3:AxisCursorGraph ShowHorizontalLine="True"   />
+                                <!--<d3:LineGraph x:Name="zjk" Stroke="OrangeRed" StrokeThickness="1"/>-->
+                                <d3:HorizontalLine Value="1" Stroke="Aqua" StrokeThickness="1" StrokeDashArray="4,5" ></d3:HorizontalLine>
+                            </d3:ChartPlotter>
+                        </GroupBox>
                     </Grid>
+                    <Button Content="开始标定" Click="Btn_Clicked_Stand" HorizontalAlignment="Left" Margin="30,105.667,0,0" VerticalAlignment="Top" Width="75" Grid.Row="2" Height="27"/>
+                    <Label Content="黑板标定距离(m)：" HorizontalAlignment="Left" Margin="18,35.667,0,0" VerticalAlignment="Top" FontSize="18" Grid.Row="2" Height="33" Width="165"/>
+                    <Slider  HorizontalAlignment="Left" ValueChanged="slider_value_change" TickFrequency="10"  Maximum="100" IsSnapToTickEnabled="True" x:Name="stand_slider" Margin="25,81.667,0,0" VerticalAlignment="Top" Height="16" Width="220" Grid.Row="2"/>
+                    <TextBlock x:Name="DistTextBlock" TextWrapping="Wrap" Text="00000" FontSize="48" Foreground="#FFC18484" Margin="0,147.667,101.333,0" Height="59" VerticalAlignment="Top" HorizontalAlignment="Right" Width="144" Grid.Row="2"/>
                 </Grid>
             </TabItem>
             <TabItem Header="操作">
                 <Grid Background="#FFE5E5E5" Margin="0">
                     <CheckBox x:Name="ckBoxStr" Content="String" Margin="661,0,0,281" RenderTransformOrigin="0.679,-0.556" HorizontalAlignment="Left" Width="62" Height="27" VerticalAlignment="Bottom"/>
-                    <Button Content="开始标定" Click="Btn_Clicked_Stand" HorizontalAlignment="Left" Margin="24,238.5,0,0" VerticalAlignment="Top" Width="75"/>
-                    <Label Content="黑板标定距离(m)：" HorizontalAlignment="Left" Margin="12,168.5,0,0" VerticalAlignment="Top" FontSize="18"/>
-                    <Slider  HorizontalAlignment="Left" ValueChanged="slider_value_change" TickFrequency="10"  Maximum="100" IsSnapToTickEnabled="True" x:Name="stand_slider" Margin="19,213.5,0,0" VerticalAlignment="Top" Height="16" Width="220"/>
                     <TextBlock HorizontalAlignment="Left" Text="{Binding Value, ElementName=stand_slider}" Margin="167,175.96,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" FontSize="20" Width="54" RenderTransformOrigin="-1.382,0.702" Foreground="#FF298BF2"/>
                     <GroupBox Header="接收" Background="#CC649497" BorderBrush="{x:Null}" Margin="650,10,10,318">
                         <ScrollViewer x:Name="receiveScrollViewer">

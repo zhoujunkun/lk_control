@@ -129,6 +129,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Dynamicdisplay\dyDisplay.cs" />
     <Compile Include="info.xaml.cs">
       <DependentUpon>info.xaml</DependentUpon>
     </Compile>

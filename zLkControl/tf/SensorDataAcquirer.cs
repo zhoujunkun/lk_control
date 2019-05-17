@@ -9,8 +9,8 @@ namespace zLkControl
         private long SensorDataFrmaegCounter;  //记录接收数据帧计数
         private Queue<SensorDataItem> SensorDataFrmaeBuffer = new Queue<SensorDataItem>(); // 帧缓存
         public Queue<byte> SerialPortReadBuffer = new Queue<byte>();
-        public SensorDataAcquirer.SensorDataChangedHandler SensorDataChangedEvent;
-        public delegate void SensorDataChangedHandler(SensorDataItem sensorDataItem, long counter);
+        public sensorDataChangedHandler SensorDataChangedEvent;
+        public delegate void sensorDataChangedHandler(byte[]buff);
         public object LockThis = new object();
         public thinyFrame lkFrame = new thinyFrame(1);
         sendFrame lk_sendHandle = new sendFrame();
@@ -40,11 +40,18 @@ namespace zLkControl
                         SerialPortReadBuffer.Enqueue(item);  //添加接收的数据到缓存末尾
                     }
                     byte[] revBuf = SerialPortReadBuffer.ToArray(); //将缓存转换字节数组
-                    for (int i = 0; i < revBuf.Length; i++)  //协议解析
+                    if (SerialPortReadBuffer.Count == 8)
                     {
-                        lkFrame.AcceptByte(revBuf[i], lkSensor);
+                        SensorDataChangedEvent(buf);
+                        SerialPortReadBuffer.Clear();  //清除缓存数据
                     }
-                    SerialPortReadBuffer.Clear();  //清除缓存数据
+
+                    
+                    //for (int i = 0; i < revBuf.Length; i++)  //协议解析
+                    //{
+                    //    lkFrame.AcceptByte(revBuf[i], lkSensor);
+                    //}
+                   
                     if (lkSensor.isReceveSucceed)
                     {
                         ProcessSensorDataItem(lkSensor);  //处理完成后回调函数
@@ -57,7 +64,7 @@ namespace zLkControl
         private void ProcessSensorDataItem(SensorDataItem sensorDataItem)
         {
             SensorDataFrmaegCounter++;
-            SensorDataChangedEvent(sensorDataItem, SensorDataFrmaegCounter);
+
         }
 
         public bool Start()
