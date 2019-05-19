@@ -135,6 +135,7 @@
     </Compile>
     <Compile Include="LKSensorCmd.cs" />
     <Compile Include="lk_param.cs" />
+    <Compile Include="RingBufferManager\RingBufferManager.cs" />
     <Compile Include="sendDataitem.cs" />
     <Compile Include="Setting.xaml.cs">
       <DependentUpon>Setting.xaml</DependentUpon>
