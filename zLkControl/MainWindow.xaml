@@ -80,7 +80,9 @@
                     <Button Content="开始标定" Click="Btn_Clicked_Stand" HorizontalAlignment="Left" Margin="30,105.667,0,0" VerticalAlignment="Top" Width="75" Grid.Row="2" Height="27"/>
                     <Label Content="黑板标定距离(m)：" HorizontalAlignment="Left" Margin="18,35.667,0,0" VerticalAlignment="Top" FontSize="18" Grid.Row="2" Height="33" Width="165"/>
                     <Slider  HorizontalAlignment="Left" ValueChanged="slider_value_change" TickFrequency="10"  Maximum="100" IsSnapToTickEnabled="True" x:Name="stand_slider" Margin="25,81.667,0,0" VerticalAlignment="Top" Height="16" Width="220" Grid.Row="2"/>
-                    <TextBlock x:Name="DistTextBlock" TextWrapping="Wrap" Text="00000" FontSize="48" Foreground="#FFC18484" Margin="0,147.667,101.333,0" Height="59" VerticalAlignment="Top" HorizontalAlignment="Right" Width="144" Grid.Row="2"/>
+                    <TextBlock x:Name="DistTextBlock" TextWrapping="Wrap" Text="00000" FontSize="48" Foreground="#FFC18484" Margin="0,6,73.333,0" Height="59" VerticalAlignment="Top" HorizontalAlignment="Right" Width="144"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="163,121.667,0,0" Grid.Row="2" TextWrapping="Wrap" Name="textBlock_sigal" Text="TextBlock" VerticalAlignment="Top" Height="25" Width="93" FontSize="18"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="163,159.667,0,0" Grid.Row="2" TextWrapping="Wrap" Name="textBlock_dist" Text="TextBlock" VerticalAlignment="Top" Height="25" Width="93" FontSize="18"/>
                 </Grid>
             </TabItem>
             <TabItem Header="操作">

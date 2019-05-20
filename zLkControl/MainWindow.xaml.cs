@@ -15,9 +15,11 @@ using Microsoft.Research.DynamicDataDisplay;
 using Microsoft.Research.DynamicDataDisplay.DataSources;
 using System.Windows.Media;
 using zLkControl.Dynamicdisplay;
+using System.Linq;
 [assembly: SuppressIldasm()]
 namespace zLkControl
 {
+    using System.Linq;
     using System.Text.RegularExpressions;
 
     /// <summary>
@@ -105,7 +107,9 @@ namespace zLkControl
      
         const int LK03_DISPLAY_TYPE = (int)(LKSensorCmd.FRAME_TYPE.DataGet);
         const int LK03_PARM_TYPE = (int) (LKSensorCmd.FRAME_TYPE.ParamGet);
-        int data_counts;
+        Points[] test =new Points[100];
+        int[] distBuf = new int[100];
+        private UInt16 lk_distStand { set; get; }  //标定完距离的参数
         /// <summary>
         /// lk type listenr
         /// </summary>
@@ -116,7 +120,9 @@ namespace zLkControl
             eftPtsPerSec++;
             base.Dispatcher.BeginInvoke(new ThreadStart(delegate ()
             {
-                UInt16 dist =(UInt16)( lkData[1] << 8 | lkData[0]);
+                UInt16 signal_vol = (UInt16)( lkData[0] << 8 | lkData[1]);
+                UInt16 dist = (UInt16)(lkData[2] << 8 | lkData[3]);
+                UInt16 ad603_agc = (UInt16)(lkData[4] << 8 | lkData[5]);
                 this.ddCounter++;
                 int xax = ddCounter - 100;
                 if (xax <= 0)
@@ -126,9 +132,34 @@ namespace zLkControl
                 // plotterTimeLine.Viewport.Visible = new System.Windows.Rect(xax, 0, 50, data.dist+1000);
                 //  plotterTimeLine.Viewport.Width = (xax);
                 this.dd.Add(new Points((uint)this.ddCounter, dist));
+                this.sighal_dd.Add(new Points((uint)this.ddCounter, signal_vol));
+                textBlock_sigal.Text = (signal_vol-1000).ToString();
+                DistTextBlock.Text = dist.ToString();
+                if(ifStandDistStart)
+                {
+                    for (int i = 0; i < 100; i++)
+                    {
+                        test[i] = dd[i];
+                        distBuf[i] = (int)test[i].Value;
+                    }
+                    ifStandDistStart = false;
+                    lk_distStand=(UInt16) data_standValculate(distBuf);
+                }
+
+                
+
+
             }), new object[0]);
         }
-
+        /// <summary>
+        /// 标定数据计算
+        /// </summary>
+        /// <param name="buf"></param>
+     private double data_standValculate(int [] arry)
+        {
+            Array.Sort(arry);  //排序
+            return arry.Average();
+        }
         /// <summary>
         /// 开机参数显示
         /// </summary>
@@ -592,18 +623,19 @@ namespace zLkControl
             ShowData(send_msg.sendFrame, null);
 
         }
-
+        bool ifStandDistStart = false;  //开始标定标记
         private void Btn_Clicked_Stand(object sender, RoutedEventArgs e)
         {
             if (Lk_Serial.check())
             {
-                send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.QC);
-                send_msg.id = (byte)(LKSensorCmd.FRAME_QCcmdID.stand_start);
-                send_msg.ifHeadOnly = false;  //含标定数据
-                send_msg.sendbuf = BitConverter.GetBytes(LKSensorCmd.stand_distance);    //数据帧缓存
-                send_msg.len = LKSensorCmd.parmStandDistByteSize; //数据帧字节长度
-                Lk_Serial.SendMsg(send_msg);
-                ShowData(send_msg.sendFrame, null);
+                ifStandDistStart = true;
+                //send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.QC);
+                //send_msg.id = (byte)(LKSensorCmd.FRAME_QCcmdID.stand_start);
+                //send_msg.ifHeadOnly = false;  //含标定数据
+                //send_msg.sendbuf = BitConverter.GetBytes(LKSensorCmd.stand_distance);    //数据帧缓存
+                //send_msg.len = LKSensorCmd.parmStandDistByteSize; //数据帧字节长度
+                //Lk_Serial.SendMsg(send_msg);
+                //ShowData(send_msg.sendFrame, null);
             }
             else
             {

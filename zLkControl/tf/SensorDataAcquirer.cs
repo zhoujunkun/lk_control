@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
+using zLkControl.RingBufferManager;
 namespace zLkControl
 {
    public class SensorDataAcquirer
@@ -15,6 +16,7 @@ namespace zLkControl
         public thinyFrame lkFrame = new thinyFrame(1);
         sendFrame lk_sendHandle = new sendFrame();
         SensorDataItem lkSensor = new SensorDataItem();
+
         /*初始化串口，新建一个串口*/
         public void IniteSerial(string comport, int baudrate)
         {
@@ -25,8 +27,10 @@ namespace zLkControl
         /*
          * 串口接收事件
          */
+
         private void SerialPortDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            
             if(check())
            {
                 int sizes = zSerPort.BytesToRead;
@@ -35,23 +39,23 @@ namespace zLkControl
                 object lockThis = LockThis;
                 lock (lockThis)
                 {
-                    foreach (byte item in buf)
-                    {
-                        SerialPortReadBuffer.Enqueue(item);  //添加接收的数据到缓存末尾
-                    }
-                    byte[] revBuf = SerialPortReadBuffer.ToArray(); //将缓存转换字节数组
-                    if (SerialPortReadBuffer.Count == 8)
-                    {
-                        SensorDataChangedEvent(buf);
-                        SerialPortReadBuffer.Clear();  //清除缓存数据
-                    }
+                    //foreach (byte item in buf)
+                    //{
+                    //    SerialPortReadBuffer.Enqueue(item);  //添加接收的数据到缓存末尾
 
-                    
+                    //}
+                    //byte[] revBuf = SerialPortReadBuffer.ToArray(); //将缓存转换字节数组
+
+                    //// SensorDataChangedEvent(buf);
                     //for (int i = 0; i < revBuf.Length; i++)  //协议解析
                     //{
                     //    lkFrame.AcceptByte(revBuf[i], lkSensor);
                     //}
-                   
+                    //SerialPortReadBuffer.Clear();  //清除缓存数据
+                    for (int i = 0; i < buf.Length; i++)  //协议解析
+                    {
+                        lkFrame.AcceptByte(buf[i], lkSensor);
+                    }
                     if (lkSensor.isReceveSucceed)
                     {
                         ProcessSensorDataItem(lkSensor);  //处理完成后回调函数
