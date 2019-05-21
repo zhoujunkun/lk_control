@@ -30,6 +30,7 @@ namespace zLkControl
     {
         private dyDisplay dd = new dyDisplay();
         private dyDisplay sighal_dd = new dyDisplay();
+        private dyDisplay Gain603_dd = new dyDisplay();
         private LineGraph chart;
         //正则匹配
         Regex reg = new Regex(@"COM[0-9]*");  //正则表达式提取COM
@@ -107,9 +108,10 @@ namespace zLkControl
      
         const int LK03_DISPLAY_TYPE = (int)(LKSensorCmd.FRAME_TYPE.DataGet);
         const int LK03_PARM_TYPE = (int) (LKSensorCmd.FRAME_TYPE.ParamGet);
-        Points[] test =new Points[100];
         int[] distBuf = new int[100];
-        private UInt16 lk_distStand { set; get; }  //标定完距离的参数
+        int[] gainBuf = new int[100];
+        private UInt16 lk_distCalibration { set; get; }  //标定完校准值
+        private UInt16 lk_gain { set; get; }  //标定完当前距离的增益
         /// <summary>
         /// lk type listenr
         /// </summary>
@@ -133,17 +135,22 @@ namespace zLkControl
                 //  plotterTimeLine.Viewport.Width = (xax);
                 this.dd.Add(new Points((uint)this.ddCounter, dist));
                 this.sighal_dd.Add(new Points((uint)this.ddCounter, signal_vol));
-                textBlock_sigal.Text = (signal_vol-1000).ToString();
+                Gain603_dd.Add(new Points((uint)this.ddCounter, ad603_agc));
                 DistTextBlock.Text = dist.ToString();
                 if(ifStandDistStart)
                 {
                     for (int i = 0; i < 100; i++)
                     {
-                        test[i] = dd[i];
-                        distBuf[i] = (int)test[i].Value;
+                        distBuf[i] = (int)dd[i].Value;
+                        gainBuf[i] = (int)Gain603_dd[i].Value;
                     }
                     ifStandDistStart = false;
-                    lk_distStand=(UInt16) data_standValculate(distBuf);
+                  UInt16  lk_Stand=(UInt16) data_standValculate(distBuf);
+                    lk_gain = (UInt16)data_standValculate(gainBuf);
+                    lk_distCalibration = (UInt16)(lk_Stand - stand_slider.Value * 100);
+                    textBox_calibration.Text = lk_distCalibration.ToString(); // 校准值
+                    textBox_average.Text = lk_Stand.ToString();  //平均值   
+                    textBox_gain.Text = lk_gain.ToString();
                 }
 
                 
@@ -241,7 +248,12 @@ namespace zLkControl
                 dsighal.SetXMapping((Points x) => x.Counter);
                 dsighal.SetYMapping((Points y) => y.Value);
                 this.chart = plotterTimeLine.AddLineGraph(dsighal, Colors.Red, 2.0,"峰值电压");
-               
+
+                EnumerableDataSource<Points> d603Gain = new EnumerableDataSource<Points>(this.Gain603_dd);
+                d603Gain.SetXMapping((Points x) => x.Counter);
+                d603Gain.SetYMapping((Points y) => y.Value);
+                this.chart = plotterTimeLine.AddLineGraph(d603Gain, Colors.DarkGreen, 2.0, "增益值");
+
                 this.plotterTimeLine.LegendVisible = true;
                 //  plotterTimeLine.Viewport.FitToView();
                 //plotterTimeLine.Children.Remove(plotterTimeLine.MouseNavigation); //取消鼠标拖动及缩放绘图仪
@@ -629,13 +641,7 @@ namespace zLkControl
             if (Lk_Serial.check())
             {
                 ifStandDistStart = true;
-                //send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.QC);
-                //send_msg.id = (byte)(LKSensorCmd.FRAME_QCcmdID.stand_start);
-                //send_msg.ifHeadOnly = false;  //含标定数据
-                //send_msg.sendbuf = BitConverter.GetBytes(LKSensorCmd.stand_distance);    //数据帧缓存
-                //send_msg.len = LKSensorCmd.parmStandDistByteSize; //数据帧字节长度
-                //Lk_Serial.SendMsg(send_msg);
-                //ShowData(send_msg.sendFrame, null);
+
             }
             else
             {
@@ -1214,6 +1220,25 @@ namespace zLkControl
                 Lk_Serial.Close();
 
             }
+        }
+
+        private void Btn_Clicked_saveParam(object sender, RoutedEventArgs e)
+        {
+
+            //发送保存参数
+            //发送消息 前基准
+            send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.QC);
+            send_msg.id = (byte)(LKSensorCmd.FRAME_QCcmdID.Stand);  //校准参数
+            send_msg.ifHeadOnly = false;  //含有数据帧
+            byte[] setByte = new byte[4];
+            setByte[0] = (byte)(lk_distCalibration >> 8);
+            setByte[1] = (byte)(lk_distCalibration & 0xff);
+            setByte[2] = (byte)(lk_gain >> 8);
+            setByte[3] = (byte)(lk_gain & 0xff);
+            send_msg.sendbuf = setByte;    //数据帧缓存
+            send_msg.len = (UInt16)setByte.Length; //数据帧字节长度
+            Lk_Serial.SendMsg(send_msg);
+
         }
     }
     #endregion
