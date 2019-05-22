@@ -26,12 +26,14 @@ namespace zLkControl
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
     /// 
-    public partial class MainWindow : MetroWindow, INotifyPropertyChanged
+    public partial class MainWindow : MetroWindow
     {
         private dyDisplay dd = new dyDisplay();
         private dyDisplay sighal_dd = new dyDisplay();
         private dyDisplay Gain603_dd = new dyDisplay();
         private LineGraph chart;
+        //QC
+        LK03QC lk03_qc = new LK03QC();
         //正则匹配
         Regex reg = new Regex(@"COM[0-9]*");  //正则表达式提取COM
         //tf
@@ -60,6 +62,7 @@ namespace zLkControl
         {
             InitializeComponent();
             base.Loaded += new RoutedEventHandler(this.Window_Loaded);
+            DataContext = lk03_qc;
         }
     
         //lk general listenr
@@ -94,6 +97,12 @@ namespace zLkControl
                         settingWin.ackCallback(ack_id);
                     }
                     break;
+                case LKSensorCmd.FRAME_TYPE.QC:
+                    { 
+                        LKSensorCmd.FRAME_QCcmdID qc_id = (LKSensorCmd.FRAME_QCcmdID)(sensor.id);
+                        QC_ID_Func(qc_id, lkData);
+                    }
+                    break;
                 case LKSensorCmd.FRAME_TYPE.Erro:
                     {
 
@@ -104,14 +113,43 @@ namespace zLkControl
             }
 
         }
+        static int size_stand = 3;
        
+        /// <summary>
+        /// QC 接收处理函数，
+        /// </summary>
+        /// <param name="id">传入id</param>
+        /// <param name="buff">数据</param>
+        public void QC_ID_Func(LKSensorCmd.FRAME_QCcmdID id,byte [] buff)
+        {
+            UInt16[] test = new UInt16[size_stand * 3];   //保存获取到的标定数据
+            switch(id)
+            {
+                case LKSensorCmd.FRAME_QCcmdID.GetParam:
+                    {
+                        for(int i=0;i< size_stand; i++)
+                        {
+                            test[0 + i * size_stand] = (UInt16)(buff[0+ i * 5] << 8 | buff[1+ i * 5]);
+                            test[1 + i * size_stand] = (UInt16)(buff[2+ i * 5] << 8 | buff[3+ i * 5]);
+                            test[2 + i * size_stand] = (UInt16)(buff[4+ i * 5]);
+                            lk_distCalibration[i] = test[0+i*3];
+                            lk_gain[i] = test[1+ i * 3];
+                            lk_ifLkHavedStand[i] = (test[2+ i * 3] == 1);
+                        }
+                    }
+                    break;
+            }
+        }
      
         const int LK03_DISPLAY_TYPE = (int)(LKSensorCmd.FRAME_TYPE.DataGet);
+        const int LK03_QC_TYPE = (int)(LKSensorCmd.FRAME_TYPE.QC);
         const int LK03_PARM_TYPE = (int) (LKSensorCmd.FRAME_TYPE.ParamGet);
         int[] distBuf = new int[100];
         int[] gainBuf = new int[100];
-        private UInt16 lk_distCalibration { set; get; }  //标定完校准值
-        private UInt16 lk_gain { set; get; }  //标定完当前距离的增益
+        private UInt16[] lk_distCalibration = new UInt16[3] ; //标定完校准
+        private UInt16[] lk_gain = new UInt16[3] ;  //标定完当前距离的增益
+        private UInt16[] lk_average = new UInt16[3];  //平均值
+        private bool[] lk_ifLkHavedStand = new bool[3];   //是否已经标定过
         /// <summary>
         /// lk type listenr
         /// </summary>
@@ -145,19 +183,41 @@ namespace zLkControl
                         gainBuf[i] = (int)Gain603_dd[i].Value;
                     }
                     ifStandDistStart = false;
-                  UInt16  lk_Stand=(UInt16) data_standValculate(distBuf);
-                    lk_gain = (UInt16)data_standValculate(gainBuf);
-                    lk_distCalibration = (UInt16)(lk_Stand - stand_slider.Value * 100);
-                    textBox_calibration.Text = lk_distCalibration.ToString(); // 校准值
-                    textBox_average.Text = lk_Stand.ToString();  //平均值   
-                    textBox_gain.Text = lk_gain.ToString();
-                }
+                    if(lk03_qc.ifRadioFirstStand)
+                    {
+                        convertAnddisplay(STAND_INDEX.First_stand);
+                    } else if(lk03_qc.ifRadioSecondStand)
+                    {
+                        convertAnddisplay(STAND_INDEX.Second_stand);
+                    }
+                    else if(lk03_qc.ifRadioThirdStand)
+                    {
+                        convertAnddisplay(STAND_INDEX.Third_stand);
+                    }
 
-                
-
-
+                }    
             }), new object[0]);
         }
+        public void QC_func(SensorDataItem sensor)
+        {
+
+        }
+      public enum STAND_INDEX { First_stand=0,Second_stand,Third_stand} ;   //档位选择
+        /// <summary>
+        /// 三挡选择和对应数据显示
+        /// </summary>
+        /// <param name="select">档位选择 STAND_INDEX</param>
+        public void  convertAnddisplay(STAND_INDEX select)
+        {
+            byte index = (byte)select;
+            lk_average[index] = (UInt16)data_standValculate(distBuf);
+            lk_gain[index] = (UInt16)data_standValculate(gainBuf);
+            lk_distCalibration[index] = (UInt16)(lk_average[index] - stand_slider.Value * 100);
+            textBox_calibration.Text = lk_distCalibration[index].ToString(); // 校准值显示
+            textBox_average.Text = lk_average[index].ToString();  //平均值显示  
+            textBox_gain.Text = lk_gain[index].ToString();//增益值显示
+         }
+
         /// <summary>
         /// 标定数据计算
         /// </summary>
@@ -230,6 +290,7 @@ namespace zLkControl
                 BarudRate.Text = "115200";
                 SensorDataAcquirer mainDataAcquirer = this.Lk_Serial;
                 //add id listen
+
                 mainDataAcquirer.lkFrame.addTYPElistener(LK03_DISPLAY_TYPE, typefunc);
                 mainDataAcquirer.lkFrame.addTYPElistener(LK03_PARM_TYPE, ParmaRevFunc);
                 mainDataAcquirer.lkFrame.addGenralListener(genralFunc);
@@ -640,7 +701,14 @@ namespace zLkControl
         {
             if (Lk_Serial.check())
             {
-                ifStandDistStart = true;
+                if((lk03_qc.ifRadioFirstStand)|(lk03_qc.ifRadioSecondStand)|(lk03_qc.ifRadioThirdStand))
+                {
+                    ifStandDistStart = true;
+                }
+                else
+                {
+                    MessageBox.Show("请先选择档位!");
+                }
 
             }
             else
@@ -1020,33 +1088,8 @@ namespace zLkControl
             
         }
 
-        #region 测速模块
-        //public double Value
-        //{
-        //    get { return _value; }
-        //    set
-        //    {
-        //        _value = value;
-        //        OnPropertyChanged("Value");
-        //    }
-        //}
-        //public event PropertyChangedEventHandler PropertyChanged;
 
-        //protected virtual void OnPropertyChanged(string propertyName = null)
-        //{
-        //    if (PropertyChanged != null)
-        //        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        //}
-        #endregion
-        public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChange(string propertyName)
-        {
-           
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
+
 
         private void Btn_Clicked_Setting(object sender, RoutedEventArgs e)
         {     
@@ -1228,17 +1271,91 @@ namespace zLkControl
             //发送保存参数
             //发送消息 前基准
             send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.QC);
-            send_msg.id = (byte)(LKSensorCmd.FRAME_QCcmdID.Stand);  //校准参数
             send_msg.ifHeadOnly = false;  //含有数据帧
             byte[] setByte = new byte[4];
-            setByte[0] = (byte)(lk_distCalibration >> 8);
-            setByte[1] = (byte)(lk_distCalibration & 0xff);
-            setByte[2] = (byte)(lk_gain >> 8);
-            setByte[3] = (byte)(lk_gain & 0xff);
+            if (lk03_qc.ifRadioFirstStand)
+            {
+                send_msg.id = (byte)(LKSensorCmd.FRAME_QCcmdID.StandParamFirst);  //校准参数
+                setByte[0] = (byte)(lk_distCalibration[0] >> 8);
+                setByte[1] = (byte)(lk_distCalibration[0] & 0xff);
+                setByte[2] = (byte)(lk_gain[0] >> 8);
+                setByte[3] = (byte)(lk_gain[0] & 0xff);
+            }
+            else if(lk03_qc.ifRadioSecondStand)
+            {
+                send_msg.id = (byte)(LKSensorCmd.FRAME_QCcmdID.StandParamSecond);  //校准参数
+                setByte[0] = (byte)(lk_distCalibration[1] >> 8);
+                setByte[1] = (byte)(lk_distCalibration[1] & 0xff);
+                setByte[2] = (byte)(lk_gain[1] >> 8);
+                setByte[3] = (byte)(lk_gain[1] & 0xff);
+            }
+            else if (lk03_qc.ifRadioThirdStand)
+            {
+                send_msg.id = (byte)(LKSensorCmd.FRAME_QCcmdID.StandParamThird);  //校准参数
+                setByte[0] = (byte)(lk_distCalibration[2] >> 8);
+                setByte[1] = (byte)(lk_distCalibration[2] & 0xff);
+                setByte[2] = (byte)(lk_gain[2] >> 8);
+                setByte[3] = (byte)(lk_gain[2] & 0xff);
+            }
+
+
             send_msg.sendbuf = setByte;    //数据帧缓存
             send_msg.len = (UInt16)setByte.Length; //数据帧字节长度
             Lk_Serial.SendMsg(send_msg);
 
+        }
+
+        private void Btn_Clicked_getStandParam(object sender, RoutedEventArgs e)
+        {
+            send_msg.Type = (byte)(LKSensorCmd.FRAME_TYPE.QC);
+            send_msg.id = (byte)(LKSensorCmd.FRAME_QCcmdID.GetParam);
+            send_msg.ifHeadOnly = true;
+            Lk_Serial.SendMsg(send_msg);
+        }
+
+        private void radioBtn_first_click(object sender, RoutedEventArgs e)
+        {   
+            if(lk_ifLkHavedStand[0])
+            {
+                btn_stand.Content = "已标定";
+            }
+            else
+            {
+                btn_stand.Content = "未标定";
+            }
+            textBox_calibration.Text = lk_distCalibration[0].ToString(); // 校准值  
+            textBox_gain.Text = lk_gain[0].ToString();
+            textBox_average.Text = lk_average[0].ToString();
+        }
+
+        private void radioBtn_second_click(object sender, RoutedEventArgs e)
+        {
+            if (lk_ifLkHavedStand[1])
+            {
+                btn_stand.Content = "已标定";
+            }
+            else
+            {
+                btn_stand.Content = "未标定";
+            }
+            textBox_calibration.Text = lk_distCalibration[1].ToString(); // 校准值  
+            textBox_gain.Text = lk_gain[1].ToString();
+            textBox_average.Text = lk_average[1].ToString();
+        }
+
+        private void radioBtn_third_click(object sender, RoutedEventArgs e)
+        {
+            if (lk_ifLkHavedStand[2])
+            {
+                btn_stand.Content = "已标定";
+            }
+            else
+            {
+                btn_stand.Content = "未标定";
+            }
+            textBox_calibration.Text = lk_distCalibration[2].ToString(); // 校准值  
+            textBox_gain.Text = lk_gain[2].ToString();
+            textBox_average.Text = lk_average[2].ToString();
         }
     }
     #endregion
@@ -1263,5 +1380,56 @@ namespace zLkControl
         public int DateTime { get; set; }
         public UInt16 Value { get; set; }
     }
+    public class LK03QC: INotifyPropertyChanged
+    {
+        public bool ifSelctFirstStand;
+        public bool ifSelctSecondStand;
+        public bool ifSelctThirdStand;
+        public bool ifRadioFirstStand
+        {
+            get
+            {
+                return ifSelctFirstStand;
+            }
+            set
+            {
+                ifSelctFirstStand = value;
+                OnPropertyChange("ifRadioFirstStand");
+            }
+        }
+        public bool ifRadioSecondStand
+        {
+            get
+            {
+                return ifSelctSecondStand;
+            }
+            set
+            {
+                ifSelctSecondStand = value;
+                OnPropertyChange("ifSelctSecondStand");
+            }
+        }
+        public bool ifRadioThirdStand
+        {
+            get
+            {
+                return ifSelctThirdStand;
+            }
+            set
+            {
+                ifSelctThirdStand = value;
+                OnPropertyChange("ifSelctThirdStand");
+            }
+        }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChange(string propertyName)
+        {
+
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
 }

@@ -51,8 +51,8 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" MinHeight="155"/>
-                        <RowDefinition Height="163*"/>
-                        <RowDefinition Height="227*"/>
+                        <RowDefinition Height="29*"/>
+                        <RowDefinition Height="49*"/>
                     </Grid.RowDefinitions>
                     <Button  Content="单次" x:Name="Btn_Once" IsEnabled="False" Click="Btn_Once_Cmd" HorizontalAlignment="Left" Margin="35,0,0,23.667" Width="210" BorderBrush="#FF647878" FontSize="20" Background="{x:Null}" Foreground="#FFA46161" Height="60" VerticalAlignment="Bottom"/>
                     <Button Content="连续" x:Name="Btn_Continue" IsEnabled="False" Click="Btn_Contitue_Cmd" Margin="32,56.333,0,0" BorderBrush="Black" Height="60" VerticalAlignment="Top" HorizontalAlignment="Left" Width="210" FontSize="20" Grid.Row="1">
@@ -74,22 +74,26 @@
                                 <d3:AxisCursorGraph ShowHorizontalLine="True"   />
                                 <d3:HorizontalLine Value="1" Stroke="Aqua" StrokeThickness="1" StrokeDashArray="4,5" ></d3:HorizontalLine>
                             </d3:ChartPlotter>
-                            
+
                         </GroupBox>
                     </Grid>
-                    <Button Content="开始标定" Click="Btn_Clicked_Stand" HorizontalAlignment="Left" Margin="22,73.667,0,0" VerticalAlignment="Top" Width="75" Grid.Row="2" Height="27"/>
+                    <Button Content="开始标定" Name="btn_stand" Click="Btn_Clicked_Stand" HorizontalAlignment="Left" Margin="108,72.667,0,0" VerticalAlignment="Top" Width="75" Grid.Row="2" Height="27"/>
                     <Label Content="黑板标定距离(m)：" HorizontalAlignment="Left" Margin="8,10.667,0,0" VerticalAlignment="Top" FontSize="18" Grid.Row="2" Height="33" Width="158"/>
-                    <Slider  HorizontalAlignment="Left" ValueChanged="slider_value_change" TickFrequency="10"  Maximum="100" IsSnapToTickEnabled="True" x:Name="stand_slider" Margin="13,49.667,0,0" VerticalAlignment="Top" Height="16" Width="220" Grid.Row="2"/>
+                    <Slider  HorizontalAlignment="Left" ValueChanged="slider_value_change" TickFrequency="1"  Maximum="100" IsSnapToTickEnabled="True" x:Name="stand_slider" Margin="13,49.667,0,0" VerticalAlignment="Top" Height="16" Width="220" Grid.Row="2"/>
                     <TextBlock x:Name="DistTextBlock" TextWrapping="Wrap" Text="00000" FontSize="48" Foreground="#FFC18484" Margin="0,6,73.333,0" Height="59" VerticalAlignment="Top" HorizontalAlignment="Right" Width="144"/>
 
-                    <Label Content="校准值:" HorizontalAlignment="Left" Margin="43,105.667,0,0" Grid.Row="2" VerticalAlignment="Top" FontSize="18"/>
-                    <TextBox HorizontalAlignment="Left" Height="23" Name="textBox_calibration" Margin="120,110.667,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontSize="16"/>
-                    <TextBox HorizontalAlignment="Left" Height="23" Name="textBox_average" Margin="120,147.667,0,0" Grid.Row="2" TextWrapping="Wrap"  VerticalAlignment="Top" Width="120" FontSize="16" />
-                    <Label Content="平均值:" HorizontalAlignment="Left" Margin="43,143.667,0,0" Grid.Row="2" VerticalAlignment="Top" FontSize="18"/>
-                    <TextBlock HorizontalAlignment="Left" Text="{Binding Value, ElementName=stand_slider}" Margin="170,16.667,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" FontSize="20" Width="54" RenderTransformOrigin="-1.382,0.702" Foreground="#FF298BF2" Grid.Row="2"/>
-                    <TextBox HorizontalAlignment="Left" Height="23" x:Name="textBox_gain" Margin="120,185.667,0,0" Grid.Row="2" TextWrapping="Wrap"  VerticalAlignment="Top" Width="120" FontSize="16" />
-                    <Label Content="增益值:" HorizontalAlignment="Left" Margin="43,180.667,0,0" Grid.Row="2" VerticalAlignment="Top" FontSize="18"/>
-                    <Button Content="保存参数" Click="Btn_Clicked_saveParam" HorizontalAlignment="Left" Margin="154,74.667,0,0" Grid.Row="2" VerticalAlignment="Top" Width="75"/>
+                    <Label Content="校准值:" HorizontalAlignment="Left" Margin="104,114.667,0,0" Grid.Row="2" VerticalAlignment="Top" Height="26" Width="51"/>
+                    <TextBox HorizontalAlignment="Left" Height="26" Name="textBox_calibration" Margin="155,115.667,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="121" FontSize="16"/>
+                    <TextBox HorizontalAlignment="Left" Height="26" Name="textBox_average" Margin="155,152.667,0,0" Grid.Row="2" TextWrapping="Wrap"  VerticalAlignment="Top" Width="120" FontSize="16" />
+                    <Label Content="平均值:" HorizontalAlignment="Left" Margin="105,154.667,0,0" Grid.Row="2" VerticalAlignment="Top" Height="25" Width="49"/>
+                    <TextBlock HorizontalAlignment="Left" Text="{Binding Value, ElementName=stand_slider}" Margin="170,16.667,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" FontSize="20" Width="26" RenderTransformOrigin="-1.382,0.702" Foreground="#FF298BF2" Grid.Row="2" Height="25"/>
+                    <TextBox HorizontalAlignment="Left" Height="26" x:Name="textBox_gain" Margin="155,190.667,0,0" Grid.Row="2" TextWrapping="Wrap"  VerticalAlignment="Top" Width="120" FontSize="16" />
+                    <Label Content="增益值:" HorizontalAlignment="Left" Margin="105,192.667,0,0" Grid.Row="2" VerticalAlignment="Top" Height="24" Width="49"/>
+                    <Button Content="保存标定参数" Click="Btn_Clicked_saveParam" HorizontalAlignment="Left" Margin="199,70.667,0,0" Grid.Row="2" VerticalAlignment="Top" Width="75" Height="27"/>
+                    <RadioButton Content="1挡" Click="radioBtn_first_click" IsChecked="{Binding ifRadioFirstStand ,Mode=TwoWay}" Name="radioBtn_First" HorizontalAlignment="Left" Margin="10,115.667,0,0" Grid.Row="2" VerticalAlignment="Top" Height="18" Width="43"/>
+                    <RadioButton Content="2挡" Click="radioBtn_second_click" IsChecked="{Binding ifRadioSecondStand ,Mode=TwoWay}" Name="radioBtn_Second" HorizontalAlignment="Left" Margin="10,153.667,0,0" Grid.Row="2" VerticalAlignment="Top" RenderTransformOrigin="0.552,0.049" Height="18" Width="43"/>
+                    <RadioButton Content="3挡" Click="radioBtn_third_click" IsChecked="{Binding ifRadioThirdStand ,Mode=TwoWay}" Name="radioBtn_Third"  HorizontalAlignment="Left" Margin="11,192.667,0,0" Grid.Row="2" VerticalAlignment="Top" Height="18" Width="43"/>
+                    <Button Content="获取标定参数" Click="Btn_Clicked_getStandParam" HorizontalAlignment="Left" Margin="16,72.667,0,0" Grid.Row="2" VerticalAlignment="Top" Width="75"/>
                 </Grid>
             </TabItem>
             <TabItem Header="操作">
