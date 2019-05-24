@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:d3="http://research.microsoft.com/DynamicDataDisplay/1.0"  
-        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"              
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"       
+         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:local="clr-namespace:zLkControl"
         xmlns:controlzex="urn:controlzex" x:Class="zLkControl.MainWindow"
         mc:Ignorable="d"
@@ -136,6 +137,13 @@
                     <Button Content="S"  Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" HorizontalAlignment="Left" Margin="241,27,0,0" VerticalAlignment="Top" Width="28" Height="28" Foreground="#FF5399B9"/>
                     <Button Content="S"  Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" HorizontalAlignment="Left" Margin="240,79,0,442" Width="28" FontSize="10" Foreground="#FF5399B9"/>
 
+                </Grid>
+            </TabItem>
+            <TabItem Header="测试">
+                <Grid>
+                    <oxy:PlotView Model="{Binding plotModel}" Margin="117,0,0,0"/>
+                    <Button Content="开始" Click="Btn_Clicked_Start" HorizontalAlignment="Left" Margin="20,52,0,0" VerticalAlignment="Top" Width="75"/>
+                    <Button Content="停止" Click="Btn_Clicked_Close" HorizontalAlignment="Left" Margin="21,100,0,0" VerticalAlignment="Top" Width="75"/>
                 </Grid>
             </TabItem>
             <Grid Height="545" Width="1166">

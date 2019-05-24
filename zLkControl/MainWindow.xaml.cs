@@ -16,9 +16,12 @@ using Microsoft.Research.DynamicDataDisplay.DataSources;
 using System.Windows.Media;
 using zLkControl.Dynamicdisplay;
 using System.Linq;
+using zLkControl.z_oxyPlot;
 [assembly: SuppressIldasm()]
 namespace zLkControl
 {
+    using OxyPlot;
+    using OxyPlot.Series;
     using System.Linq;
     using System.Text.RegularExpressions;
 
@@ -32,6 +35,9 @@ namespace zLkControl
         private dyDisplay sighal_dd = new dyDisplay();
         private dyDisplay Gain603_dd = new dyDisplay();
         private LineGraph chart;
+        //oxyplot test
+        public PlotModel plotModel { get; set; }
+       
         //QC
         LK03QC lk03_qc = new LK03QC();
         //正则匹配
@@ -62,7 +68,15 @@ namespace zLkControl
         {
             InitializeComponent();
             base.Loaded += new RoutedEventHandler(this.Window_Loaded);
-            DataContext = lk03_qc;
+            // DataContext = lk03_qc;
+            /*  oxyplot test*/
+            InitializeComponent();
+            plotModel = new PlotModel();
+            plotModel.Series.Add(new FunctionSeries());
+            DataContext = this;
+        
+     
+          
         }
     
         //lk general listenr
@@ -1356,6 +1370,35 @@ namespace zLkControl
             textBox_calibration.Text = lk_distCalibration[2].ToString(); // 校准值  
             textBox_gain.Text = lk_gain[2].ToString();
             textBox_average.Text = lk_average[2].ToString();
+        }
+
+        private void Btn_Clicked_Close(object sender, RoutedEventArgs e)
+        {
+        
+        }
+
+        private void Btn_Clicked_Start(object sender, RoutedEventArgs e)
+        {
+            double x = 0;
+            Func<double, double> s_test = (X) => X;
+           var worker = new BackgroundWorker { WorkerSupportsCancellation = true };
+            worker.DoWork += (s, v) =>
+            {
+                while (!worker.CancellationPending)
+                {
+                    lock (this.plotModel.SyncRoot)
+                    {
+                        this.plotModel.Title = "Plot updated: " + DateTime.Now;
+                        this.plotModel.Series[0] = new FunctionSeries(s_test, x, x + 10, 1.0);
+
+                    }
+                    x += 0.1;
+                    plotModel.InvalidatePlot(true);
+                    Thread.Sleep(500);
+                }
+            };
+            worker.RunWorkerAsync();
+          
         }
     }
     #endregion
